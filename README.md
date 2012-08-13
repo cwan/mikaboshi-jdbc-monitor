@@ -1,11 +1,10 @@
-mikaboshi-jdbc-monitor
-======================
+# mikaboshi JDBC monitor
 
 This is the monitoring tool of JDBC (Java Database Connectivity). You can see SQL statements executed in any application.
 
-![architecture](https://raw.github.com/cwan/mikaboshi-jdbc-monitor/master/images/architecture.png)
+これは、JDBC (Java Database Connectivity) の監視ツールです。任意のアプリケーションで発行される SQL 文を確認することができます。
 
----
+![architecture](https://raw.github.com/cwan/mikaboshi-jdbc-monitor/master/images/architecture.png)
 
 ## manual
 
