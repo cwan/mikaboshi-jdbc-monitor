@@ -1,5 +1,4 @@
-mikaboshi-jdbc-monitor
-======================
+# mikaboshi JDBC monitor
 
 This is the monitoring tool of JDBC (Java Database Connectivity). You can see SQL statements executed in any application.
 
