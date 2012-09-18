@@ -8,7 +8,7 @@ This is a monitoring tool of JDBC (Java Database Connectivity). You can see SQL 
 
 ## Document
 
-* [English](/cwan/mikaboshi-jdbc-monitor/wiki/manual_en)
+* [English](/cwan/mikaboshi-jdbc-monitor/wiki/manual_en) _Sorry, Under Construction..._
 * [日本語](/cwan/mikaboshi-jdbc-monitor/wiki/manual_ja)
 
 ## License
