@@ -1,2 +1,3 @@
 *.class
 *.log
+jdbc_log_viewer.xml
