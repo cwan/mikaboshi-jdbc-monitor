@@ -1,0 +1,7 @@
+mikaboshi-jdbc-monitor
+Copyright 2008-2012 Takuma Umezawa
+
+This product includes software developed by
+Mikaboshi Project < https://github.com/cwan/mikaboshi-jdbc-monitor >.
+
+

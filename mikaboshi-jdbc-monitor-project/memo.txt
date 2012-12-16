@@ -1,3 +1,7 @@
 JDKのtools.jarをmavenリポジトリに追加する
 
-mvn install:install-file -Dfile=C:\Java\jdk1.6.0_17\lib\tools.jar -DgroupId=com.sun -DartifactId=tools -Dversion=1.6 -Dpackaging=jar -DgeneratePom=true
+	mvn install:install-file -Dfile=C:\Java\jdk1.6.0_31\lib\tools.jar -DgroupId=com.sun -DartifactId=tools -Dversion=1.6.0 -Dpackaging=jar -DgeneratePom=true
+
+pleadesのJDKは使わない
+
+
