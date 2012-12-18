@@ -205,7 +205,7 @@ public class JdbcLogViewerFrame extends JFrame {
 			gridBagConstraints.anchor = GridBagConstraints.CENTER;
 			gridBagConstraints.gridx = 0;
 			JLabel dropLogFileHereLabel = new JLabel();
-			dropLogFileHereLabel.setText("ここにログファイルをドロップ");
+			dropLogFileHereLabel.setText("JdbcLogViewerFrame.drop_log_file_here");
 			dropLogFileHereLabel.setName("dropFileHereLabel");
 			logFileOpenPanel = new JPanel();
 			logFileOpenPanel.setLayout(new GridBagLayout());
