@@ -5,9 +5,11 @@
 	<groupId>net.mikaboshi</groupId>
 	<artifactId>mikaboshi-jdbc-monitor</artifactId>
 	<version>1.4.1-BETA</version>
-	<url>https://github.com/cwan/mikaboshi-jdbc-monitor</url>
-	<name>mikaboshi-jdbc-monitor</name>
 	<description></description>
+	<organization>
+		<name>mikaboshi-jdbc-monitor</name>
+		<url>https://github.com/cwan/mikaboshi-jdbc-monitor</url>
+	</organization>
 	<build>
 		<plugins>
 			<plugin>
@@ -81,15 +83,6 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<includes>
-					<include>**/*.properties</include>
-				</includes>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
 	</build>
 	<dependencies>
 		<dependency>
