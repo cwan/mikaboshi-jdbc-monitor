@@ -61,11 +61,11 @@ import javax.swing.event.MouseInputAdapter;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import net.mikaboshi.gui.GuiUtils;
-import net.mikaboshi.jdbc.SQLFormatter;
 import net.mikaboshi.jdbc.monitor.LogEntry;
 import net.mikaboshi.jdbc.monitor.LogFileAccessor;
 import net.mikaboshi.jdbc.monitor.M17N;
 import net.mikaboshi.jdbc.monitor.Result;
+import net.mikaboshi.jdbc.monitor.SqlUtils;
 import net.mikaboshi.jdbc.monitor.ViewerConfig;
 import net.mikaboshi.jdbc.monitor.ViewerConfig.Filter;
 import net.mikaboshi.util.ThreadSafeUtils;
@@ -624,7 +624,7 @@ public class JdbcLogViewerFrame extends JFrame {
 
 			if (logEntry.getSql() != null) {
 				if (ViewerConfig.getInstance().isDetailSqlFormat()) {
-					sql = new SQLFormatter().format(logEntry.getSql());
+					sql = SqlUtils.format(logEntry.getSql());
 				} else {
 					sql = logEntry.getSql();
 				}

@@ -28,7 +28,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import net.mikaboshi.gui.GuiUtils;
-import net.mikaboshi.jdbc.SQLFormatter;
 import net.mikaboshi.jdbc.monitor.LogEntry;
 import net.mikaboshi.jdbc.monitor.M17N;
 import net.mikaboshi.jdbc.monitor.SqlUtils;
@@ -150,7 +149,7 @@ public class LogDetailFrame extends JFrame {
 
 			if (ViewerConfig.getInstance().isDetailSqlFormat()) {
 				sqlTextArea.setText(
-						new SQLFormatter().format(this.logEntry.getSql()));
+						SqlUtils.format(this.logEntry.getSql()));
 			} else {
 				sqlTextArea.setText(SqlUtils.replaceCrLf(this.logEntry.getSql()));
 			}
@@ -221,7 +220,7 @@ public class LogDetailFrame extends JFrame {
 
 		if (ViewerConfig.getInstance().isDetailSqlFormat()) {
 			sqlTextArea.setText(
-					new SQLFormatter().format(this.logEntry.getSql()));
+					SqlUtils.format(this.logEntry.getSql()));
 		} else {
 			sqlTextArea.setText(SqlUtils.replaceCrLf(this.logEntry.getSql()));
 		}

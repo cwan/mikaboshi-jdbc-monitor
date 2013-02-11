@@ -9,6 +9,12 @@ import java.text.SimpleDateFormat;
 import java.util.SortedMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import blanco.commons.sql.format.BlancoSqlFormatter;
+import blanco.commons.sql.format.BlancoSqlFormatterException;
+import blanco.commons.sql.format.BlancoSqlRule;
 
 /**
  * SQLに関するユーティリティクラス。
@@ -16,62 +22,66 @@ import org.apache.commons.lang.StringUtils;
  *
  */
 public class SqlUtils {
-	
+
+	private static final Log logger = LogFactory.getLog(SqlUtils.class);
+
+	private static final BlancoSqlFormatter formatter;
+
 	/**
 	 * PreparedStatementの?を、実パラメータに変換する。
 	 * ログ出力用の簡易機能なので、実際のSQL実行には使用してはならない。
-	 * 
+	 *
 	 * @param pstmt
 	 * @return
 	 */
 	public static String replaceParameters(
 			String sql, SortedMap<Integer, Object> boundParameters) {
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		int parameterIndex = 1;
-		
+
 		// 文字列リテラルの中かどうか
 		boolean isInQuote = false;
-		
+
 		for (char c : sql.toCharArray()) {
 			if (!isInQuote && c == '?') {
 				Object param = boundParameters.get(parameterIndex++);
-				
+
 				if (param == null) {
 					sb.append("null");
 
 				} else if (param instanceof Number) {
 					sb.append(param);
-				
+
 				} else {
 					sb.append('\'');
 					sb.append(StringUtils.replace(param.toString(), "'", "''"));
 					sb.append('\'');
 				}
-				
+
 			} else {
 				sb.append(c);
 			}
-			
+
 			if (c == '\'') {
 				isInQuote = !isInQuote;
 			}
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	/**
 	 * SQL中の改行をスペースに変換する。
-	 * 
+	 *
 	 * @param sql
 	 * @return
 	 */
 	public static String replaceCrLf(String sql) {
 		StringBuilder sb = new StringBuilder();
 		char previous = 0;
-		
+
 		for (char c : sql.toCharArray()) {
 			if (c == '\r' || c == '\n') {
 				if (!Character.isWhitespace(previous)) {
@@ -81,60 +91,92 @@ public class SqlUtils {
 			} else {
 				sb.append(c);
 			}
-			
+
 			previous = c;
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	private static final SimpleDateFormat dateFormat =
 		new SimpleDateFormat("yyyy-MM-dd");
-	
+
 	private static final SimpleDateFormat timeFormat =
 		new SimpleDateFormat("HH:mm:ss");
-	
+
 	private static final SimpleDateFormat timestampFormat =
 		new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
+
 	private static final DecimalFormat nanosFormat =
 		new DecimalFormat("'.'000000000");
-	
+
 	/**
 	 * 日時や数値のパラメータをSQL形式の文字列に変換する。
 	 * @param o
 	 * @return
 	 */
 	public static String formatParameter(Object o) {
-		
+
 		if (o == null) {
 			return "null";
 		}
-		
+
 		if (o instanceof Date) {
 			synchronized(dateFormat) {
 				return dateFormat.format(o);
 			}
 		}
-		
+
 		if (o instanceof Time) {
 			synchronized(timeFormat) {
 				return timeFormat.format(o);
 			}
 		}
-		
+
 		if (o instanceof Timestamp) {
 			int nanos = ((Timestamp) o).getNanos();
-			
+
 			synchronized (timestampFormat) {
 				return timestampFormat.format(o) + nanosFormat.format(nanos);
 			}
 		}
-		
+
 		if (o instanceof BigDecimal) {
 			return ((BigDecimal) o).toPlainString();
 		}
-		
+
 		return o.toString();
+	}
+
+	static {
+
+		BlancoSqlRule blancoSqlRule = new BlancoSqlRule();
+		blancoSqlRule.setKeywordCase(BlancoSqlRule.KEYWORD_UPPER_CASE);
+
+		formatter = new BlancoSqlFormatter(blancoSqlRule);
+
+	}
+
+	/**
+	 * SQLをフォーマットする
+	 * @param sql
+	 * @return
+	 * @since 1.4.1
+	 */
+	public static String format(String sql) {
+
+		if (sql == null) {
+			return StringUtils.EMPTY;
+		}
+
+		try {
+			return formatter.format(sql);
+
+		} catch (BlancoSqlFormatterException e) {
+
+			logger.debug("SQL format error: [" + sql + "]", e);
+
+			return sql;
+		}
 	}
 }
