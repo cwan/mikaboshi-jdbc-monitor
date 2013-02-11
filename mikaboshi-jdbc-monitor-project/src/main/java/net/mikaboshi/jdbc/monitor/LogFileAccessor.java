@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.io.Reader;
+import java.nio.charset.Charset;
 
 import net.mikaboshi.csv.CSVStrategy;
 import net.mikaboshi.csv.StandardCSVStrategy;
@@ -33,6 +34,7 @@ public class LogFileAccessor {
 
 	private String logFilePath;
 	private String logFileCharset;
+	private String indicatedLogFileCharset;
 
 	public LogFileAccessor(String logFilePath, String logFileCharset) {
 		this(new File(logFilePath), logFileCharset);
@@ -41,6 +43,7 @@ public class LogFileAccessor {
 	public LogFileAccessor(File logFile, String logFileCharset) {
 		this.logFilePath = logFile.getAbsolutePath();
 		this.logFileCharset = logFileCharset;
+		this.indicatedLogFileCharset = logFileCharset;
 
 		// シャットダウン時にファイルを閉じる
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -84,6 +87,14 @@ public class LogFileAccessor {
 	 */
 	private int retryCount = 0;
 
+	private Reader logFileReader;
+
+	private InputStream logFileInputStream;
+
+	private int lineCount = 0;
+
+	private boolean charsetIsSet = false;
+
 	/**
 	 * 次のログファイルの論理行を読み込む。
 	 * 「論理行」とは、物理的な改行コードではなく、１件のログが終わるまでを意味する（CSVの1行）。
@@ -97,6 +108,8 @@ public class LogFileAccessor {
 		if ( this.logFileReader == null ) {
 			open();
 		}
+
+		this.lineCount++;
 
 		long logFileLength = new File(this.logFilePath).length();
 
@@ -146,6 +159,22 @@ public class LogFileAccessor {
 				return readNextLog();
 			}
 		}
+
+		if (items.length == 3 && LogWriter.LOGTYPE_CHARSET.equals(items[0])) {
+
+			if (this.lineCount == 1 && !this.charsetIsSet && StringUtils.isBlank(this.indicatedLogFileCharset)) {
+				// 先頭に文字コードの指定がある場合は、読みなおす
+				this.logFileCharset = items[1];
+
+				close();
+				open();
+
+				this.charsetIsSet = true;
+			}
+
+			return readNextLog();
+		}
+
 
 		ViewerConfig config = ViewerConfig.getInstance();
 
@@ -209,10 +238,6 @@ public class LogFileAccessor {
 		}
 	}
 
-	private Reader logFileReader;
-
-	private InputStream logFileInputStream;
-
 	/**
 	 * ログファイルの読み込みを開始する。
 	 * @throws IOException
@@ -228,15 +253,16 @@ public class LogFileAccessor {
 
 		this.logFileInputStream = new RandomAccessFileInputStream(logFile);
 
+		String charset = StringUtils.isNotBlank(this.logFileCharset) ? this.logFileCharset : Charset.defaultCharset().name();
 
-
-		this.logFileReader = new BufferedReader(new
-				InputStreamReader(logFileInputStream, this.logFileCharset));
+		this.logFileReader = new BufferedReader(
+				new	InputStreamReader(logFileInputStream, charset));
 
 		this.csvLineIterator = (StandardCSVStrategy.CSVIterator)
 			this.csvStrategy.csvLines(this.logFileReader).iterator();
 
 		this.fileSize = -1;
+		this.lineCount = 0;
 	}
 
 	/**

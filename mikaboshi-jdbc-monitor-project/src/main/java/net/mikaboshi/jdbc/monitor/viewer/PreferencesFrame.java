@@ -161,7 +161,11 @@ public class PreferencesFrame extends JFrame {
 	 * コンボボックスに全ての文字セットを設定する
 	 */
 	private void setAllCharset() {
-		// デフォルトを先頭
+
+		// 空白を先頭（自動取得）
+		this.encodingComboBox.addItem("");
+
+		// デフォルトをその次
 		String defaultCharset = Charset.defaultCharset().name();
 		this.encodingComboBox.addItem(defaultCharset);
 

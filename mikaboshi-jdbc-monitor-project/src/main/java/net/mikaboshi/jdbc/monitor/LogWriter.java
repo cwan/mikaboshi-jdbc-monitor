@@ -1,6 +1,7 @@
 package net.mikaboshi.jdbc.monitor;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import net.mikaboshi.csv.CSVStrategy;
 import net.mikaboshi.csv.StandardCSVStrategy;
@@ -33,6 +34,8 @@ public class LogWriter {
 
 	public static final String PROP_WRITE_CONNECT = "net.mikaboshi.jdbc_monitor.write_connect";
 
+	public static final String LOGTYPE_CHARSET = "charset";
+
 	public static final String LOGTYPE_DRIVER_CLASS = "driver";
 
 	public static final String LOGTYPE_DRIVER_VERSION = "driverVersion";
@@ -44,6 +47,8 @@ public class LogWriter {
 	public static final String LOGTYPE_PASSWORD = "password";
 
 	private static Log systemLogger = LogFactory.getLog(LogWriter.class);
+
+	private static boolean outputCharset = false;
 
 	private final SimpleFileLogger logger;
 
@@ -108,8 +113,14 @@ public class LogWriter {
 	 * ドライバクラスをログに書き出す。
 	 * @param driverClass
 	 */
-	public static synchronized void putDriver(String driverClass) {
-		purConnectInfo(LOGTYPE_DRIVER_CLASS, driverClass);
+	public static void putDriver(String driverClass) {
+
+		if (!outputCharset) {
+			putSimpleInfo(LOGTYPE_CHARSET, Charset.defaultCharset().name());
+			outputCharset = true;
+		}
+
+		putConnectInfo(LOGTYPE_DRIVER_CLASS, driverClass);
 	}
 
 	/**
@@ -117,8 +128,8 @@ public class LogWriter {
 	 * @param majorVersion
 	 * @param minorVersion
 	 */
-	public static synchronized void putDriverVersion(int majorVersion, int minorVersion) {
-		purConnectInfo(LOGTYPE_DRIVER_VERSION,
+	public static void putDriverVersion(int majorVersion, int minorVersion) {
+		putConnectInfo(LOGTYPE_DRIVER_VERSION,
 				new StringBuilder().append(majorVersion).append(".").append(minorVersion).toString());
 	}
 
@@ -127,7 +138,7 @@ public class LogWriter {
 	 * @param url
 	 */
 	public static void putUrl(String url) {
-		purConnectInfo(LOGTYPE_URL, url);
+		putConnectInfo(LOGTYPE_URL, url);
 	}
 
 	/**
@@ -135,7 +146,7 @@ public class LogWriter {
 	 * @param user
 	 */
 	public static void putUser(String user) {
-		purConnectInfo(LOGTYPE_USER, user);
+		putConnectInfo(LOGTYPE_USER, user);
 	}
 
 	/**
@@ -146,7 +157,7 @@ public class LogWriter {
 	 */
 	public static void putPassword(String password) {
 		if ("true".equals(System.getProperty(PROP_WRITE_PASSWORD, "false"))) {
-			purConnectInfo(LOGTYPE_PASSWORD, password);
+			putConnectInfo(LOGTYPE_PASSWORD, password);
 		}
 	}
 
@@ -156,11 +167,16 @@ public class LogWriter {
 	 * @param logType
 	 * @param value
 	 */
-	private static synchronized void purConnectInfo(String logType, String value) {
+	private static void putConnectInfo(String logType, String value) {
 
 		if ("false".equals(System.getProperty(PROP_WRITE_CONNECT, "true"))) {
 			return;
 		}
+
+		putSimpleInfo(logType, value);
+	}
+
+	private static synchronized void putSimpleInfo(String logType, String value) {
 
 		if (instance != null) {
 
