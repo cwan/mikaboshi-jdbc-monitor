@@ -57,8 +57,41 @@ public class SqlUtils {
 					sb.append(param);
 
 				} else {
+
+					String value;
+
+					if (param instanceof java.sql.Timestamp) {
+
+						int nanos = ((Timestamp) param).getNanos();
+
+						synchronized (timestampFormat) {
+							value = timestampFormat.format(param) + nanosFormat.format(nanos);
+						}
+
+					} else if (param instanceof java.sql.Time) {
+
+						synchronized(timeFormat) {
+							value = timeFormat.format(param);
+						}
+
+					} else if (param instanceof java.sql.Date) {
+
+						synchronized(timestampFormat) {
+							value = timestampFormat.format(param);
+						}
+
+					} else if (param instanceof java.util.Date) {
+
+						synchronized(dateFormat) {
+							value = dateFormat.format(param);
+						}
+
+					} else {
+						value = StringUtils.replace(param.toString(), "'", "''");
+					}
+
 					sb.append('\'');
-					sb.append(StringUtils.replace(param.toString(), "'", "''"));
+					sb.append(value);
 					sb.append('\'');
 				}
 
