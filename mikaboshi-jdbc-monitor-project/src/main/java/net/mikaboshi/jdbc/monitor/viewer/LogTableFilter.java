@@ -287,8 +287,8 @@ public class LogTableFilter {
 				return true;
 			}
 
-			// 改行文字を取り除く
-			sql = SqlUtils.replaceCrLf(sql);
+			// 不要なスペースを取り除く
+			sql = SqlUtils.linize(sql);
 
 			if ( StringUtils.isEmpty(this.excludeRegex) ) {
 				// excludePatternが無指定ならば、includePatternにマッチするもののみ表示

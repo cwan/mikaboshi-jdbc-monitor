@@ -70,7 +70,7 @@ public class LogTableModel extends AbstractTableModel {
 		if (realColumnIndex == SQL.getColumnIndex()) {
 			return entry.getSql() == null
 					? null
-					: SqlUtils.replaceCrLf(entry.getSql());
+					: SqlUtils.linize(entry.getSql());
 		}
 
 		if (realColumnIndex == AFFECTED_ROWS.getColumnIndex()) {

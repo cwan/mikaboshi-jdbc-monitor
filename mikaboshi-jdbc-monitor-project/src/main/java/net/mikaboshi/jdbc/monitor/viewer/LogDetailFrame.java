@@ -151,7 +151,7 @@ public class LogDetailFrame extends JFrame {
 				sqlTextArea.setText(
 						SqlUtils.format(this.logEntry.getSql()));
 			} else {
-				sqlTextArea.setText(SqlUtils.replaceCrLf(this.logEntry.getSql()));
+				sqlTextArea.setText(SqlUtils.linize(this.logEntry.getSql()));
 			}
 
 			getExecuteSqlButton().setEnabled(
@@ -222,7 +222,7 @@ public class LogDetailFrame extends JFrame {
 			sqlTextArea.setText(
 					SqlUtils.format(this.logEntry.getSql()));
 		} else {
-			sqlTextArea.setText(SqlUtils.replaceCrLf(this.logEntry.getSql()));
+			sqlTextArea.setText(SqlUtils.linize(this.logEntry.getSql()));
 		}
 
 		getExecuteSqlButton().setEnabled(

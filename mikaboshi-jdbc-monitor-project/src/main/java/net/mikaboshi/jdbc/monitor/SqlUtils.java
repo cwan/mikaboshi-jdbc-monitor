@@ -8,6 +8,8 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.SortedMap;
 
+import net.mikaboshi.jdbc.SQLFormatter;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,24 +80,15 @@ public class SqlUtils {
 	 * @param sql
 	 * @return
 	 */
-	public static String replaceCrLf(String sql) {
-		StringBuilder sb = new StringBuilder();
-		char previous = 0;
+	public static String linize(String sql) {
 
-		for (char c : sql.toCharArray()) {
-			if (c == '\r' || c == '\n') {
-				if (!Character.isWhitespace(previous)) {
-					// 2つ以上続けてスペースは入らないようにする
-					sb.append(' ');
-				}
-			} else {
-				sb.append(c);
-			}
-
-			previous = c;
+		if (sql == null) {
+			return StringUtils.EMPTY;
 		}
 
-		return sb.toString();
+		String[] tokenize = new SQLFormatter().tokenize(sql);
+
+		return StringUtils.join(tokenize, ' ');
 	}
 
 	private static final SimpleDateFormat dateFormat =

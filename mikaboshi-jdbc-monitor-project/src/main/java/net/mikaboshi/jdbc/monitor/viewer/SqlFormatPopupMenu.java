@@ -73,7 +73,7 @@ public class SqlFormatPopupMenu extends JPopupMenu {
 			serializeSqlMenuItem.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					sqlTextArea.setText(
-							SqlUtils.replaceCrLf(sqlTextArea.getText()));
+							SqlUtils.linize(sqlTextArea.getText()));
 
 					ViewerConfig.getInstance().setDetailSqlFormat(false);
 				}
