@@ -2121,7 +2121,6 @@ public class JdbcLogViewerFrame extends JFrame {
 				LogEntry entry = logAccessor.readNextLog();
 
 				if (entry == null) {
-					logAccessor.unlock();
 					break;
 				}
 
@@ -2183,7 +2182,6 @@ public class JdbcLogViewerFrame extends JFrame {
 								"",
 								ERROR_MESSAGE);
 
-						logAccessor.unlock();
 						break;
 					}
 
@@ -2191,8 +2189,6 @@ public class JdbcLogViewerFrame extends JFrame {
 						getLogTableModel().addLogEntryWithFireUpdate(entry);
 						updated[0] = true;
 						continue;
-					} else {
-						logAccessor.unlock();
 					}
 
 					try {

@@ -1,11 +1,16 @@
 package net.mikaboshi.jdbc.monitor;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.io.Reader;
 
 import net.mikaboshi.csv.CSVStrategy;
 import net.mikaboshi.csv.StandardCSVStrategy;
-import net.mikaboshi.io.UnlockableReader;
+import net.mikaboshi.io.RandomAccessFileInputStream;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -202,7 +207,9 @@ public class LogFileAccessor {
 		}
 	}
 
-	private UnlockableReader logFileReader;
+	private Reader logFileReader;
+
+	private InputStream logFileInputStream;
 
 	/**
 	 * ログファイルの読み込みを開始する。
@@ -215,11 +222,14 @@ public class LogFileAccessor {
 			return;
 		}
 
-		File logFile = new File(this.logFilePath);
+		RandomAccessFile logFile = new RandomAccessFile(this.logFilePath, "r");
 
-		this.logFileReader = new UnlockableReader(
-						logFile,
-						this.logFileCharset);
+		this.logFileInputStream = new RandomAccessFileInputStream(logFile);
+
+
+
+		this.logFileReader = new BufferedReader(new
+				InputStreamReader(logFileInputStream, this.logFileCharset));
 
 		this.csvLineIterator = (StandardCSVStrategy.CSVIterator)
 			this.csvStrategy.csvLines(this.logFileReader).iterator();
@@ -245,15 +255,17 @@ public class LogFileAccessor {
 				logger.error("error occurs in closing logFileReader", e);
 			}
 		}
-	}
 
-	/**
-	 * ログファイルのロックを解除する。
-	 */
-	public void unlock() {
-		if (this.logFileReader != null) {
-			this.logFileReader.unlock();
+		if ( this.logFileInputStream != null ) {
+			try {
+				this.logFileInputStream.close();
+				this.logFileInputStream = null;
+
+			} catch (IOException e) {
+				logger.error("error occurs in closing logFileInputStream", e);
+			}
 		}
 	}
+
 
 }
