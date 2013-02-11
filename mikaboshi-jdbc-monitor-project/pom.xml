@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.mikaboshi</groupId>
 	<artifactId>mikaboshi-jdbc-monitor</artifactId>
-	<version>1.4.1-BETA</version>
+	<version>1.4.1</version>
 	<url>https://github.com/cwan/mikaboshi-jdbc-monitor</url>
 	<name>mikaboshi-jdbc-monitor</name>
 	<description></description>
@@ -95,7 +95,7 @@
 		<dependency>
 			<groupId>net.mikaboshi</groupId>
 			<artifactId>mikaboshi-java-utils</artifactId>
-			<version>1.1.8-BETA</version>
+			<version>[1.1.8,)</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
