@@ -153,6 +153,8 @@ public class LogFileAccessor {
 			// DB接続情報
 			if (LogWriter.LOGTYPE_DRIVER_CLASS.equals(items[0])) {
 				config.getConnectInfo().setDriver(items[1]);
+			} else if (LogWriter.LOGTYPE_DRIVER_VERSION.equals(items[0])) {
+				config.getConnectInfo().setDriverVersion(items[1]);
 			} else if (LogWriter.LOGTYPE_URL.equals(items[0])) {
 				config.getConnectInfo().setUrl(items[1]);
 			} else if (LogWriter.LOGTYPE_USER.equals(items[0])) {

@@ -797,6 +797,8 @@ public class ViewerConfig {
 
 		private String driver = StringUtils.EMPTY;
 
+		private String driverVersion = StringUtils.EMPTY;
+
 		private String url = StringUtils.EMPTY;
 
 		private String user = StringUtils.EMPTY;
@@ -809,6 +811,14 @@ public class ViewerConfig {
 
 		public void setDriver(String driver) {
 			this.driver = driver;
+		}
+
+		public String getDriverVersion() {
+			return driverVersion;
+		}
+
+		public void setDriverVersion(String driverVersion) {
+			this.driverVersion = driverVersion;
 		}
 
 		public String getUrl() {

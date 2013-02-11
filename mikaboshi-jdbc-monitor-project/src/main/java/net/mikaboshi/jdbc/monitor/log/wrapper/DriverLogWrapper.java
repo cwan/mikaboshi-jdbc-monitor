@@ -33,7 +33,7 @@ import org.apache.commons.lang.StringUtils;
  * <br/>
  * パラメータ {@code write-password} はオプションである。「true」を指定すると、データベース接続情報のパスワードがログに出力される（write-connect も true である必要がある）。
  * </p>
- * 
+ *
  * @author Takuma Umezawa
  */
 public class DriverLogWrapper implements Driver {
@@ -45,28 +45,28 @@ public class DriverLogWrapper implements Driver {
 			throw new RuntimeException("Registering JDBC Logger driver failed.", e);
 		}
 	}
-	
+
 	private Driver driver;
 	String url;
 	String driverClassName;
-	
+
 	public DriverLogWrapper() {}
 
 	@Override
 	public boolean acceptsURL(String url) throws SQLException {
 		parseUrl(url);
 		createDriver();
-		
+
 		return this.driver.acceptsURL(this.url);
 	}
-	
+
 	@Override
 	public Connection connect(String url, Properties info) throws SQLException {
 		parseUrl(url);
 		createDriver();
-		
+
 		logProperties(info);
-		
+
 		return new ConnectionWrapper(this.driver.connect(this.url, info));
 	}
 
@@ -83,12 +83,12 @@ public class DriverLogWrapper implements Driver {
 	@Override
 	public DriverPropertyInfo[] getPropertyInfo(String url, Properties info)
 			throws SQLException {
-		
+
 		parseUrl(url);
 		createDriver();
-		
+
 		logProperties(info);
-		
+
 		return this.getPropertyInfo(this.url, info);
 	}
 
@@ -96,40 +96,44 @@ public class DriverLogWrapper implements Driver {
 	public boolean jdbcCompliant() {
 		return this.driver.jdbcCompliant();
 	}
-	
+
 	private void createDriver() {
 		if (this.driver != null) {
 			return;
 		}
-		
+
 		try {
 			Class<?> clazz = Class.forName(this.driverClassName);
 			this.driver = (Driver) clazz.newInstance();
+
+			// バージョンをログに出力する
+			LogWriter.putDriverVersion(this.driver.getMajorVersion(), this.driver.getMinorVersion());
+
 		} catch (Exception e) {
 			throw new RuntimeException("Creating JDBC Logger driver failed.", e);
 		}
 	}
-	
+
 	void parseUrl(String url) throws SQLException {
-		
+
 		if (this.url != null) {
 			return;
 		}
-		
+
 		String[] match = ThreadSafeUtils.match(url, "(.+)\\?(.+)");
-		
+
 		if (match == null) {
 			throw new SQLException("Invalid URL : " + url);
 		}
-		
+
 		this.url = match[0];
-		
+
 		StringBuilder properParams = new StringBuilder();
-		
+
 		try {
 			for (String query : match[1].split("&")) {
 				String[] param = query.split("=");
-				
+
 				if (param[0].equals("driver")) {
 					this.driverClassName = param[1];
 				} else if (param[0].equals("logfile")) {
@@ -151,27 +155,27 @@ public class DriverLogWrapper implements Driver {
 					} else {
 						properParams.append("&");
 					}
-					
+
 					properParams.append(query);
 				}
 			}
 		} catch (Exception e) {
 			throw new SQLException("Invalid URL : " + url);
 		}
-		
+
 		if (this.driverClassName == null) {
 			throw new SQLException("Invalid URL : " + url);
 		}
-		
+
 		if (properParams.length() != 0) {
 			this.url += properParams.toString();
 		}
-		
+
 		// 接続情報ログ出力
 		LogWriter.putDriver(this.driverClassName);
 		LogWriter.putUrl(this.url);
 	}
-	
+
 	private void logProperties(Properties info) {
 		LogWriter.putUser(info.getProperty("user", StringUtils.EMPTY));
 		LogWriter.putPassword(info.getProperty("password", StringUtils.EMPTY));
