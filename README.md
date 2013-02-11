@@ -8,8 +8,8 @@ This is a monitoring tool of JDBC (Java Database Connectivity). You can see SQL 
 
 ## Document
 
-* [English](/cwan/mikaboshi-jdbc-monitor/wiki/manual_en) _Sorry, Under Construction..._
-* [日本語](/cwan/mikaboshi-jdbc-monitor/wiki/manual_ja)
+* [English](https://github.com/cwan/mikaboshi-jdbc-monitor/wiki/manual_en) _Sorry, Under Construction..._
+* [日本語](https://github.com/cwan/mikaboshi-jdbc-monitor/wiki/manual_ja)
 
 ## License
-[Apache License, Version 2.0](https://github.com/cwan/mikaboshi-jdbc-monitor/blob/master/LICENSE.txt)
+[Apache License, Version 2.0](https://github.com/cwan/mikaboshi-jdbc-monitor/blob/master/license/LICENSE.txt)
