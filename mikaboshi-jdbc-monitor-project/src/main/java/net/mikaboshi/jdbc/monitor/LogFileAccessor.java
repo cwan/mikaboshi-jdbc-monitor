@@ -1,7 +1,9 @@
 package net.mikaboshi.jdbc.monitor;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,8 +13,8 @@ import java.nio.charset.Charset;
 
 import net.mikaboshi.csv.CSVStrategy;
 import net.mikaboshi.csv.StandardCSVStrategy;
-import net.mikaboshi.io.RandomAccessFileInputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,6 +37,34 @@ public class LogFileAccessor {
 	private String logFilePath;
 	private String logFileCharset;
 	private String indicatedLogFileCharset;
+
+	/**
+	 * 前回読み込んだときのファイルサイズ。（読み直しのチェックに使う）
+	 */
+	private long fileSize = -1L;
+
+	/**
+	 * ログの１論理行を解析する
+	 */
+	private CSVStrategy csvStrategy = new StandardCSVStrategy();
+
+	private StandardCSVStrategy.CSVIterator csvLineIterator;
+
+	/**
+	 * 前回ログが取得できなかった場合はtrue
+	 */
+	private boolean noLog = false;
+
+	/**
+	 * 不完全なログを読み込んだ時のリトライ
+	 */
+	private int retryCount = 0;
+
+	private Reader logFileReader;
+	private InputStream logFileInputStream;
+	private int lineCount = 0;
+	private boolean charsetIsSet = false;
+	private RandomAccessFile logFile;
 
 	public LogFileAccessor(String logFilePath, String logFileCharset) {
 		this(new File(logFilePath), logFileCharset);
@@ -64,36 +94,6 @@ public class LogFileAccessor {
 	public boolean existsLogFile() {
 		return new File(this.logFilePath).exists();
 	}
-
-	/**
-	 * 前回読み込んだときのファイルサイズ。（読み直しのチェックに使う）
-	 */
-	private long fileSize = -1L;
-
-	/**
-	 * ログの１論理行を解析する
-	 */
-	private CSVStrategy csvStrategy = new StandardCSVStrategy();
-
-	private StandardCSVStrategy.CSVIterator csvLineIterator;
-
-	/**
-	 * 前回ログが取得できなかった場合はtrue
-	 */
-	private boolean noLog = false;
-
-	/**
-	 * 不完全なログを読み込んだ時のリトライ
-	 */
-	private int retryCount = 0;
-
-	private Reader logFileReader;
-
-	private InputStream logFileInputStream;
-
-	private int lineCount = 0;
-
-	private boolean charsetIsSet = false;
 
 	/**
 	 * 次のログファイルの論理行を読み込む。
@@ -249,14 +249,14 @@ public class LogFileAccessor {
 			return;
 		}
 
-		RandomAccessFile logFile = new RandomAccessFile(this.logFilePath, "r");
+		this.logFile = new RandomAccessFile(this.logFilePath, "r");
 
-		this.logFileInputStream = new RandomAccessFileInputStream(logFile);
+		this.logFileInputStream = new BufferedInputStream(new FileInputStream(this.logFile.getFD()));
 
 		String charset = StringUtils.isNotBlank(this.logFileCharset) ? this.logFileCharset : Charset.defaultCharset().name();
 
 		this.logFileReader = new BufferedReader(
-				new	InputStreamReader(logFileInputStream, charset));
+				new	InputStreamReader(this.logFileInputStream, charset));
 
 		this.csvLineIterator = (StandardCSVStrategy.CSVIterator)
 			this.csvStrategy.csvLines(this.logFileReader).iterator();
@@ -270,29 +270,14 @@ public class LogFileAccessor {
 	 */
 	public synchronized void close() {
 
-		if ( !new File(this.logFilePath).exists() ) {
-			return;
-		}
+		IOUtils.closeQuietly(this.logFileReader);
+		this.logFileReader = null;
 
-		if ( this.logFileReader != null ) {
-			try {
-				this.logFileReader.close();
-				this.logFileReader = null;
+		IOUtils.closeQuietly(this.logFileInputStream);
+		this.logFileInputStream = null;
 
-			} catch (IOException e) {
-				logger.error("error occurs in closing logFileReader", e);
-			}
-		}
-
-		if ( this.logFileInputStream != null ) {
-			try {
-				this.logFileInputStream.close();
-				this.logFileInputStream = null;
-
-			} catch (IOException e) {
-				logger.error("error occurs in closing logFileInputStream", e);
-			}
-		}
+		IOUtils.closeQuietly(this.logFile);
+		this.logFile = null;
 	}
 
 
