@@ -1,9 +1,9 @@
-JDKのtools.jarをmavenリポジトリに追加する
+●JDKのtools.jarをmavenリポジトリに追加する
 
-	mvn install:install-file -Dfile=C:\Java\jdk1.6.0_31\lib\tools.jar -DgroupId=com.sun -DartifactId=tools -Dversion=1.6.0 -Dpackaging=jar -DgeneratePom=true
+	mvn install:install-file -Dfile=C:\Java\jdk1.6.0_41\lib\tools.jar -DgroupId=com.sun -DartifactId=tools -Dversion=1.6.0 -Dpackaging=jar -DgeneratePom=true
 
-blancoSqlFormatterをmavenリポジトリに追加する
+●blancoSqlFormatterをmavenリポジトリに追加する
 
-	mvn install:install-file -Dfile=blancosqlformatter-0.1.0.jar -DgroupId=blanco -DartifactId=sqlFormatter -Dversion=0.1.0 -Dpackaging=jar -DgeneratePom=true
+	mvn install:install-file -Dfile=sqlformatter-0.1.0.jar -DgroupId=blanco -DartifactId=sqlFormatter -Dversion=0.1.0 -Dpackaging=jar -DgeneratePom=true
 
-pleadesのJDKは使わない
+●pleadesのJDKは使わない
