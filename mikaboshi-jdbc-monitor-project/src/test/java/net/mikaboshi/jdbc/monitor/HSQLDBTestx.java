@@ -15,11 +15,11 @@ import net.mikaboshi.jdbc.QueryExecutor;
 public class HSQLDBTestx {
 
 	private Connection conn;
-	
+
 	public static void main(String[] args) throws Exception {
 		new HSQLDBTestx().execute();
 	}
-	
+
 	public void execute() throws Exception {
 		try {
 			this.conn = DbUtils.getConnection(
@@ -31,66 +31,67 @@ public class HSQLDBTestx {
 			insert2();
 			update();
 			executeBatch();
+			executePreparedBatch();
 			query();
-			
+
 			this.conn.commit();
-			
+
 		}catch (SQLException e) {
 			DbUtils.rollbackQuietly(this.conn);
-			
+
 		} finally {
 			DbUtils.closeQuietly(this.conn);
 		}
 	}
-	
+
 	private void createTable() throws SQLException, IOException {
-		DmlExecutor.execute(this.conn, 
+		DmlExecutor.execute(this.conn,
 			"create table jdbc_aop (id integer primary key, name varchar)");
 	}
-	
+
 	private void insert() throws SQLException {
 		PreparedStatement pstmt = null;
-		
+
 		try {
 			pstmt = this.conn.prepareStatement("insert into jdbc_aop values (?, ?)");
-			
+
 			DmlExecutor.execute(pstmt, new Object[] {1, "aaa"});
 			DmlExecutor.execute(pstmt, new Object[] {2, "bbb"});
 			DmlExecutor.execute(pstmt, new Object[] {3, "ああ'あ"});
-			
+
 		} finally {
 			DbUtils.closeQuietly(pstmt);
 		}
 	}
-	
+
 	private void update() throws SQLException {
 		PreparedStatement pstmt = null;
-		
+
 		try {
 			pstmt = this.conn.prepareStatement("update jdbc_aop set name = ? where id = ?");
-			
+
 			DmlExecutor.execute(pstmt, new Object[] {"BBB", 2});
-			
+
 		} finally {
 			DbUtils.closeQuietly(pstmt);
 		}
 	}
-	
+
 	private void insert2() throws SQLException {
 		Statement stmt = null;
-		
+
 		try {
 			stmt = this.conn.createStatement();
 			stmt.executeUpdate("insert into jdbc_aop values (4, 'abc''drf')");
-			
+
 		} finally {
 			DbUtils.closeQuietly(stmt);
 		}
 	}
-	
+
 	private void executeBatch() throws SQLException {
 		Statement stmt = null;
-		
+
 		try {
 			stmt = this.conn.createStatement();
 			stmt.addBatch("insert into jdbc_aop values (5, 'aaaa')");
@@ -98,16 +99,35 @@ public class HSQLDBTestx {
 			stmt.addBatch("insert into jdbc_aop values (7, 'aaaa')");
 			stmt.addBatch("insert into jdbc_aop values (8, null)");
 			stmt.executeBatch();
-			
+
 		} finally {
 			DbUtils.closeQuietly(stmt);
 		}
 	}
-	
+
+	private void executePreparedBatch() throws SQLException {
+		PreparedStatement stmt = null;
+
+		try {
+			stmt = this.conn.prepareStatement("insert into jdbc_aop values (?, ?)");
+
+			for (int i = 9; i < 12; i++) {
+				stmt.setInt(1, i);
+				stmt.setString(2, "addPreparedBatch" + i);
+				stmt.addBatch();
+			}
+
+			stmt.executeBatch();
+
+		} finally {
+			DbUtils.closeQuietly(stmt);
+		}
+	}
+
 	private void query() throws SQLException {
 		List<Map<String, Object>> result = QueryExecutor.query(this.conn,
 				"select * from jdbc_aop where id >= ?", new Object[] {2});
-		
+
 		for (Map<String, Object> row : result) {
 			System.out.printf("#query id=%s, name=%s%n", row.get("id"), row.get("name"));
 		}

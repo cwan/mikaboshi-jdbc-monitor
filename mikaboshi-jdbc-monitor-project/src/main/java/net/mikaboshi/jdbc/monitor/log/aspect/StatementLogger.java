@@ -48,6 +48,9 @@ public class StatementLogger {
 	@Pointcut("execution(void java.sql.Statement+.addBatch(String)) && args(sql)")
 	public void addBatch(String sql) {}
 
+	@Pointcut("execution(void java.sql.PreparedStatement+.addBatch())")
+	public void addPreparedBatch() {}
+
 	@Pointcut("execution(int[] java.sql.Statement+.executeBatch())")
 	public void executeBatch() {}
 
@@ -218,6 +221,40 @@ public class StatementLogger {
 		} finally {
 			LogWriter.put(entry);
 			this.addBatchMutex.remove();
+		}
+	}
+
+	/**
+	 * addBatchのログを複数回とらないようにチェックする
+	 */
+	private ThreadLocal<StatementLogger> addPreparedBatchMutex
+		= new ThreadLocal<StatementLogger>();
+
+	@Around("addPreparedBatch()")
+	public Object logAddPreparedBatch(ProceedingJoinPoint thisJoinPoint) throws Throwable {
+
+		if (!this.logMode.getAddBatchLoggable() ||
+				this.addBatchMutex.get() != null) {
+			return thisJoinPoint.proceed();
+		}
+
+		LogEntry entry = new LogEntry(LogType.ADD_BATCH);
+
+		try {
+			this.addPreparedBatchMutex.set(this);
+
+			PreparedStatementWrapper pstmt =
+					(PreparedStatementWrapper) thisJoinPoint.getTarget();
+
+			// パラメータを?に代入する
+			entry.setSql( SqlUtils.replaceParameters(
+					pstmt.getSql(), pstmt.getBoundParameters()) );
+
+			return AspectUtils.proceedAndReturn(entry, thisJoinPoint);
+
+		} finally {
+			LogWriter.put(entry);
+			this.addPreparedBatchMutex.remove();
 		}
 	}
 
