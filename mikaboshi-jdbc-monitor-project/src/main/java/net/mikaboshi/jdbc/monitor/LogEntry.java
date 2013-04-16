@@ -3,15 +3,18 @@ package net.mikaboshi.jdbc.monitor;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Calendar;
 import java.util.Date;
 
 import net.mikaboshi.csv.CSVStrategy;
 import net.mikaboshi.csv.StandardCSVStrategy;
-import net.mikaboshi.util.ThreadSafeUtils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -37,6 +40,8 @@ public class LogEntry implements Serializable {
 	 */
 	public static final String TAG_SYSTEM_PROPERTY_NAME = "net.mikaboshi.jdbc.monitor.TAG_SYSTEM_PROPERTY_NAME";
 
+	private static final FastDateFormat TIME_FORMAT = FastDateFormat.getInstance("HH:mm:ss.SSS");
+
 	public LogEntry() {}
 
 	public LogEntry(String logType) {
@@ -47,8 +52,8 @@ public class LogEntry implements Serializable {
 		this.logType = logType;
 
 		Date now = new Date();
-		this.date = ThreadSafeUtils.formatDate(now, "yyyy-MM-dd");
-		this.time = ThreadSafeUtils.formatDate(now, "HH-mm-ss.SSS");
+		this.date = getDateString(now);
+		this.time = TIME_FORMAT.format(now);
 
 		this.threadId = Thread.currentThread().getId();
 		this.threadName = Thread.currentThread().getName();
@@ -60,7 +65,7 @@ public class LogEntry implements Serializable {
 	private String date = StringUtils.EMPTY;
 
 	/**
-	 * 時刻(HH-mm-ss.SSS)
+	 * 時刻(HH:mm:ss.SSS)
 	 */
 	private String time = StringUtils.EMPTY;
 
@@ -156,16 +161,16 @@ public class LogEntry implements Serializable {
 	}
 
 	/**
-	 * 時刻(HH-mm-ss.SSS)を取得します。
-	 * @return 時刻(HH-mm-ss.SSS)
+	 * 時刻(HH:mm:ss.SSS)を取得します。
+	 * @return 時刻(HH:mm:ss.SSS)
 	 */
 	public String getTime() {
 	    return time;
 	}
 
 	/**
-	 * 時刻(HH-mm-ss.SSS)を設定します。
-	 * @param time 時刻(HH-mm-ss.SSS)
+	 * 時刻(HH:mm:ss.SSS)を設定します。
+	 * @param time 時刻(HH:mm:ss.SSS)
 	 */
 	public void setTime(String time) {
 	    this.time = time;
@@ -471,7 +476,7 @@ public class LogEntry implements Serializable {
 	}
 
 	/**
-	 * 日付、時刻を結合した文字列 "yyyy-MM-dd HH-mm-ss.SSS" を取得する。
+	 * 日付、時刻を結合した文字列 "yyyy-MM-dd HH:mm:ss.SSS" を取得する。
 	 * @return
 	 */
 	public String getDateTime() {
@@ -585,6 +590,34 @@ public class LogEntry implements Serializable {
 		}
 
 		this.callStack = buf.toString();
+	}
+
+	private static String todayString = null;
+
+	private static long beginTimeToday = 0L;
+
+	private static long endTimeToday = 0L;
+
+	/**
+	 * 今日の日付文字列を取得する。
+	 * @param now
+	 * @return
+	 * @since 1.4.2
+	 */
+	private static synchronized String getDateString(Date now) {
+
+		long lNow = now.getTime();
+
+		if (todayString != null && lNow >= beginTimeToday && lNow < endTimeToday) {
+			return todayString;
+		}
+
+		todayString = DateFormatUtils.ISO_DATE_FORMAT.format(now);
+
+		beginTimeToday = DateUtils.truncate(now, Calendar.DAY_OF_MONTH).getTime();
+		endTimeToday = DateUtils.truncate(DateUtils.addDays(now, 1), Calendar.DAY_OF_MONTH).getTime();
+
+		return todayString;
 	}
 
 	private NanoStopWatch stopWatch;
