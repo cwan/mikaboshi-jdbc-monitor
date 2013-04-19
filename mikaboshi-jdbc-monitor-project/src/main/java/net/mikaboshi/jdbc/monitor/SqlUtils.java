@@ -5,12 +5,13 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
+import java.text.Format;
 import java.util.SortedMap;
 
 import net.mikaboshi.jdbc.SQLFormatter;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,6 +29,14 @@ public class SqlUtils {
 	private static final Log logger = LogFactory.getLog(SqlUtils.class);
 
 	private static final BlancoSqlFormatter formatter;
+
+	private static final Format dateFormat = FastDateFormat.getInstance("yyyy-MM-dd");
+
+	private static final Format timeFormat = FastDateFormat.getInstance("HH:mm:ss");
+
+	private static final Format timestampFormat = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
+
+	private static final Format nanosFormat = new DecimalFormat("'.'000000000");
 
 	/**
 	 * PreparedStatementの?を、実パラメータに変換する。
@@ -58,41 +67,55 @@ public class SqlUtils {
 
 				} else {
 
-					String value;
-
 					if (param instanceof java.sql.Timestamp) {
+
+						sb.append('\'');
+						sb.append(timestampFormat.format(param));
 
 						int nanos = ((Timestamp) param).getNanos();
 
-						synchronized (timestampFormat) {
-							value = timestampFormat.format(param) + nanosFormat.format(nanos);
+						String s;
+
+						synchronized (nanosFormat) {
+							s = nanosFormat.format(nanos);
 						}
+
+						sb.append(s);
+						sb.append('\'');
 
 					} else if (param instanceof java.sql.Time) {
 
-						synchronized(timeFormat) {
-							value = timeFormat.format(param);
-						}
+						sb.append('\'');
+						sb.append(timeFormat.format(param));
+						sb.append('\'');
 
 					} else if (param instanceof java.sql.Date) {
 
-						synchronized(timestampFormat) {
-							value = timestampFormat.format(param);
-						}
+						sb.append('\'');
+						sb.append(timestampFormat.format(param));
+						sb.append('\'');
 
 					} else if (param instanceof java.util.Date) {
 
-						synchronized(dateFormat) {
-							value = dateFormat.format(param);
-						}
+						sb.append('\'');
+						sb.append(dateFormat.format(param));
+						sb.append('\'');
 
 					} else {
-						value = StringUtils.replace(param.toString(), "'", "''");
-					}
 
-					sb.append('\'');
-					sb.append(value);
-					sb.append('\'');
+						sb.append('\'');
+
+						for (char ch : param.toString().toCharArray()) {
+
+							if (ch == '\'') {
+								sb.append('\'');
+							}
+
+							sb.append(ch);
+						}
+
+						sb.append('\'');
+					}
 				}
 
 			} else {
@@ -124,18 +147,6 @@ public class SqlUtils {
 		return StringUtils.join(tokenize, ' ');
 	}
 
-	private static final SimpleDateFormat dateFormat =
-		new SimpleDateFormat("yyyy-MM-dd");
-
-	private static final SimpleDateFormat timeFormat =
-		new SimpleDateFormat("HH:mm:ss");
-
-	private static final SimpleDateFormat timestampFormat =
-		new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-	private static final DecimalFormat nanosFormat =
-		new DecimalFormat("'.'000000000");
-
 	/**
 	 * 日時や数値のパラメータをSQL形式の文字列に変換する。
 	 * @param o
@@ -148,23 +159,25 @@ public class SqlUtils {
 		}
 
 		if (o instanceof Date) {
-			synchronized(dateFormat) {
-				return dateFormat.format(o);
-			}
+			return dateFormat.format(o);
 		}
 
 		if (o instanceof Time) {
-			synchronized(timeFormat) {
-				return timeFormat.format(o);
-			}
+			return timeFormat.format(o);
 		}
 
 		if (o instanceof Timestamp) {
 			int nanos = ((Timestamp) o).getNanos();
 
-			synchronized (timestampFormat) {
-				return timestampFormat.format(o) + nanosFormat.format(nanos);
+			String s1 = timestampFormat.format(o);
+
+			String s2;
+
+			synchronized (nanosFormat) {
+				s2 = nanosFormat.format(nanos);
 			}
+
+			return s1 + s2;
 		}
 
 		if (o instanceof BigDecimal) {
