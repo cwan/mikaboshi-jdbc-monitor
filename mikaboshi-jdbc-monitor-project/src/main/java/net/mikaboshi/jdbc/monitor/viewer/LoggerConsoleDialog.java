@@ -28,13 +28,13 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.mikaboshi.gui.GuiUtils;
 import net.mikaboshi.gui.IntegerInputVerifier;
 import net.mikaboshi.jdbc.monitor.LogModeMBean;
 import net.mikaboshi.jdbc.monitor.M17N;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
@@ -79,7 +79,7 @@ public class LoggerConsoleDialog extends JDialog {
 
 	/**
 	 * This method initializes this
-	 * 
+	 *
 	 * @return void
 	 */
 	private void initialize() {
@@ -92,7 +92,7 @@ public class LoggerConsoleDialog extends JDialog {
 
 	/**
 	 * This method initializes jContentPane
-	 * 
+	 *
 	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJContentPane() {
@@ -101,16 +101,16 @@ public class LoggerConsoleDialog extends JDialog {
 			jContentPane.setLayout(new BorderLayout());
 			jContentPane.add(getBodyPanel(), BorderLayout.CENTER);
 			jContentPane.add(getButtonPanel(), BorderLayout.SOUTH);
-			
+
 			GuiUtils.closeByESC(this, jContentPane);
 		}
 		return jContentPane;
 	}
 
 	/**
-	 * This method initializes bodyPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes bodyPanel
+	 *
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getBodyPanel() {
 		if (bodyPanel == null) {
@@ -203,24 +203,24 @@ public class LoggerConsoleDialog extends JDialog {
 			bodyPanel.setLayout(new GridBagLayout());
 			bodyPanel.add(callStackLevelLabel, gridBagConstraints10);
 			bodyPanel.add(getCallStackLevelTextField(), gridBagConstraints);
-			bodyPanel.add(getAddBatchLoggableCheckBox(), gridBagConstraints1);
 			bodyPanel.add(getConnectionOpenLoggableCheckBox(), gridBagConstraints11);
 			bodyPanel.add(getConnectionCloseLoggableCheckBox(), gridBagConstraints21);
 			bodyPanel.add(getCommitLoggableCheckBox(), gridBagConstraints31);
 			bodyPanel.add(getRollbackLoggableCheckBox(), gridBagConstraints4);
 			bodyPanel.add(getExecuteStatementLoggableCheckBox(), gridBagConstraints5);
-			bodyPanel.add(getExecutePreparedStatementLoggableCheckBox(), gridBagConstraints6);
 			bodyPanel.add(getPrepareStatementLoggableCheckBox(), gridBagConstraints7);
-			bodyPanel.add(getCloseStatementLoggableCheckBox(), gridBagConstraints12);
+			bodyPanel.add(getExecutePreparedStatementLoggableCheckBox(), gridBagConstraints12);
+			bodyPanel.add(getCloseStatementLoggableCheckBox(), gridBagConstraints6);
+			bodyPanel.add(getAddBatchLoggableCheckBox(), gridBagConstraints1);
 			bodyPanel.add(getExecuteBatchLoggableCheckBox(), gridBagConstraints9);
 		}
 		return bodyPanel;
 	}
 
 	/**
-	 * This method initializes buttonPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes buttonPanel
+	 *
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getButtonPanel() {
 		if (buttonPanel == null) {
@@ -250,15 +250,15 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes applyButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes applyButton
+	 *
+	 * @return javax.swing.JButton
 	 */
 	private JButton getApplyButton() {
 		if (applyButton == null) {
 			applyButton = new JButton();
 			applyButton.setText("LoggerConsoleDialog.applyButton");
-			
+
 			applyButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					storeConfig();
@@ -270,15 +270,15 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes cancelButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes cancelButton
+	 *
+	 * @return javax.swing.JButton
 	 */
 	private JButton getCancelButton() {
 		if (cancelButton == null) {
 			cancelButton = new JButton();
 			cancelButton.setText("LoggerConsoleDialog.cancelButton");
-			
+
 			cancelButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					dispose();
@@ -289,9 +289,9 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes callStackLevelTextField	
-	 * 	
-	 * @return javax.swing.JTextField	
+	 * This method initializes callStackLevelTextField
+	 *
+	 * @return javax.swing.JTextField
 	 */
 	private JTextField getCallStackLevelTextField() {
 		if (callStackLevelTextField == null) {
@@ -303,9 +303,9 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes addBatchLoggableCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes addBatchLoggableCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getAddBatchLoggableCheckBox() {
 		if (addBatchLoggableCheckBox == null) {
@@ -316,9 +316,9 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes connectionOpenLoggableCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes connectionOpenLoggableCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getConnectionOpenLoggableCheckBox() {
 		if (connectionOpenLoggableCheckBox == null) {
@@ -329,9 +329,9 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes connectionCloseLoggableCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes connectionCloseLoggableCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getConnectionCloseLoggableCheckBox() {
 		if (connectionCloseLoggableCheckBox == null) {
@@ -342,9 +342,9 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes commitLoggableCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes commitLoggableCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getCommitLoggableCheckBox() {
 		if (commitLoggableCheckBox == null) {
@@ -355,9 +355,9 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes rollbackLoggableCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes rollbackLoggableCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getRollbackLoggableCheckBox() {
 		if (rollbackLoggableCheckBox == null) {
@@ -368,9 +368,9 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes executeStatementLoggableCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes executeStatementLoggableCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getExecuteStatementLoggableCheckBox() {
 		if (executeStatementLoggableCheckBox == null) {
@@ -381,9 +381,9 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes executePreparedStatementLoggableCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes executePreparedStatementLoggableCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getExecutePreparedStatementLoggableCheckBox() {
 		if (executePreparedStatementLoggableCheckBox == null) {
@@ -394,9 +394,9 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes prepareStatementLoggableCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes prepareStatementLoggableCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getPrepareStatementLoggableCheckBox() {
 		if (prepareStatementLoggableCheckBox == null) {
@@ -414,9 +414,9 @@ public class LoggerConsoleDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes closeStatementLoggableCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes closeStatementLoggableCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getCloseStatementLoggableCheckBox() {
 		if (closeStatementLoggableCheckBox == null) {
@@ -425,11 +425,11 @@ public class LoggerConsoleDialog extends JDialog {
 		}
 		return closeStatementLoggableCheckBox;
 	}
-	
+
 	/**
-	 * This method initializes executeBatchLoggableCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes executeBatchLoggableCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getExecuteBatchLoggableCheckBox() {
 		if (executeBatchLoggableCheckBox == null) {
@@ -438,20 +438,20 @@ public class LoggerConsoleDialog extends JDialog {
 		}
 		return executeBatchLoggableCheckBox;
 	}
-	
+
 	private String pid = null;  //  @jve:decl-index=0:
-	
+
 	/**
 	 * JMXで設定を読み込む
 	 * @param pid
 	 */
 	boolean loadConfig(String pid) {
-		
+
 		this.pid = pid;
-		
+
 		try {
 			MBeanServerConnection connection = getConnection();
-			
+
 			if (connection == null) {
 				JOptionPane.showMessageDialog(
 						null,
@@ -460,14 +460,14 @@ public class LoggerConsoleDialog extends JDialog {
 						JOptionPane.WARNING_MESSAGE);
 				return false;
 			}
-			
+
 			Set<ObjectInstance> mbeans = connection.queryMBeans(
 					new ObjectName(LogModeMBean.JMX_OBJECT_NAME), null);
-	
+
 			for (ObjectInstance objInstance : mbeans) {
-				
+
 				ObjectName objectName = objInstance.getObjectName();
-				
+
 				getCallStackLevelTextField().setText(
 						String.valueOf(connection.getAttribute(objectName, "CallStackLevel")));
 				getConnectionOpenLoggableCheckBox().setSelected(
@@ -494,39 +494,39 @@ public class LoggerConsoleDialog extends JDialog {
 		} catch (AttachNotSupportedException e) {
 			String message = M17N.get("LoggerConsoleDialog.error.attach_not_supported");
 			logger.error(message, e);
-			
+
 			JOptionPane.showMessageDialog(
 					null,
 					message,
 					"",
 					JOptionPane.ERROR_MESSAGE);
-			
+
 			return false;
-			
+
 		} catch (Exception e) {
 			String message = M17N.get("LoggerConsoleDialog.error.get_mbean");
 			logger.error(message, e);
-			
+
 			JOptionPane.showMessageDialog(
 					null,
 					message,
 					"",
 					JOptionPane.ERROR_MESSAGE);
-			
+
 			return false;
 		}
-		
+
 		getExecutePreparedStatementLoggableCheckBox().setEnabled(
 				getPrepareStatementLoggableCheckBox().isSelected());
-		
+
 		return true;
 	}
-	
+
 	private void storeConfig() {
-		
+
 		try {
 			MBeanServerConnection connection = getConnection();
-			
+
 			if (connection == null) {
 				JOptionPane.showMessageDialog(
 						null,
@@ -535,55 +535,55 @@ public class LoggerConsoleDialog extends JDialog {
 						JOptionPane.WARNING_MESSAGE);
 				return;
 			}
-			
+
 			ObjectName objectName = new ObjectName(LogModeMBean.JMX_OBJECT_NAME);
-			
-			connection.setAttribute(objectName,	
-					new Attribute("CallStackLevel", 
+
+			connection.setAttribute(objectName,
+					new Attribute("CallStackLevel",
 						Integer.valueOf(getCallStackLevelTextField().getText())));
-			connection.setAttribute(objectName,	
-					new Attribute("ConnectionOpenLoggable", 
+			connection.setAttribute(objectName,
+					new Attribute("ConnectionOpenLoggable",
 						getConnectionOpenLoggableCheckBox().isSelected()));
-			connection.setAttribute(objectName,	
-					new Attribute("ConnectionCloseLoggable", 
+			connection.setAttribute(objectName,
+					new Attribute("ConnectionCloseLoggable",
 						getConnectionCloseLoggableCheckBox().isSelected()));
-			connection.setAttribute(objectName,	
-					new Attribute("CommitLoggable", 
+			connection.setAttribute(objectName,
+					new Attribute("CommitLoggable",
 						getCommitLoggableCheckBox().isSelected()));
-			connection.setAttribute(objectName,	
-					new Attribute("RollbackLoggable", 
-						getRollbackLoggableCheckBox().isSelected()));			
-			connection.setAttribute(objectName,	
-					new Attribute("ExecuteStatementLoggable", 
+			connection.setAttribute(objectName,
+					new Attribute("RollbackLoggable",
+						getRollbackLoggableCheckBox().isSelected()));
+			connection.setAttribute(objectName,
+					new Attribute("ExecuteStatementLoggable",
 						getExecuteStatementLoggableCheckBox().isSelected()));
-			connection.setAttribute(objectName,	
-					new Attribute("PrepareStatementLoggable", 
+			connection.setAttribute(objectName,
+					new Attribute("PrepareStatementLoggable",
 						getPrepareStatementLoggableCheckBox().isSelected()));
-			connection.setAttribute(objectName,	
-					new Attribute("ExecutePreparedStatementLoggable", 
+			connection.setAttribute(objectName,
+					new Attribute("ExecutePreparedStatementLoggable",
 						getExecutePreparedStatementLoggableCheckBox().isSelected()));
-			connection.setAttribute(objectName,	
-					new Attribute("CloseStatementLoggable", 
+			connection.setAttribute(objectName,
+					new Attribute("CloseStatementLoggable",
 						getCloseStatementLoggableCheckBox().isSelected()));
-			connection.setAttribute(objectName,	
-					new Attribute("AddBatchLoggable", 
+			connection.setAttribute(objectName,
+					new Attribute("AddBatchLoggable",
 						getAddBatchLoggableCheckBox().isSelected()));
-			connection.setAttribute(objectName,	
-					new Attribute("ExecuteBatchLoggable", 
+			connection.setAttribute(objectName,
+					new Attribute("ExecuteBatchLoggable",
 						getExecuteBatchLoggableCheckBox().isSelected()));
-		
+
 		} catch (Exception e) {
 			String message = M17N.get("LoggerConsoleDialog.error.set_mbean");
 			logger.error(message, e);
-			
+
 			JOptionPane.showMessageDialog(
 					null,
 					message,
 					"",
 					JOptionPane.ERROR_MESSAGE);
-		} 
+		}
 	}
-	
+
 	private MBeanServerConnection getConnection() throws AttachNotSupportedException, IOException, AgentLoadException, AgentInitializationException, MalformedObjectNameException, NullPointerException {
 		// attach to the target application
 		VirtualMachine vm = VirtualMachine.attach(this.pid);
@@ -620,7 +620,7 @@ public class LoggerConsoleDialog extends JDialog {
 		if (mbeans.isEmpty()) {
 			return null;
 		}
-		
+
 		return connection;
 	}
 
