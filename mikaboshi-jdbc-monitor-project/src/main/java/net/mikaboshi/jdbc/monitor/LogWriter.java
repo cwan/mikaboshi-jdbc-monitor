@@ -2,6 +2,10 @@ package net.mikaboshi.jdbc.monitor;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import net.mikaboshi.csv.CSVStrategy;
 import net.mikaboshi.csv.StandardCSVStrategy;
@@ -54,6 +58,10 @@ public class LogWriter {
 
 	private static final CSVStrategy csvStrategy = new StandardCSVStrategy();
 
+	private static final Queue<Object> logQueue = new ConcurrentLinkedQueue<Object>();
+
+	private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
+
 	private LogWriter() throws IOException {
 		String path =
 			System.getProperty(PROP_NAME, "jdbc.log");
@@ -84,6 +92,42 @@ public class LogWriter {
 		} catch (IOException e) {
 			systemLogger.error("creatting LogWriter instance failed.", e);
 		}
+
+		// 非同期でログを出力する
+		threadPool.execute(new Runnable() {
+
+			@Override
+			public void run() {
+
+				while (true) {
+
+					Object log = logQueue.poll();
+
+					if (log == null) {
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							systemLogger.error(e.getMessage(), e);
+						}
+
+						continue;
+					}
+
+					try {
+						if (log instanceof LogEntry) {
+							instance.logger.put(((LogEntry) log).toLogString());
+						} else if (log instanceof String) {
+							instance.logger.put((String) log);
+						}
+
+						instance.logger.flush();
+					} catch (IOException e) {
+						systemLogger.error("Writing log failed.", e);
+					}
+				}
+			}
+		});
+
 	}
 
 	/**
@@ -92,21 +136,19 @@ public class LogWriter {
 	 *
 	 * @param entry
 	 */
-	public static synchronized void put(LogEntry entry) {
-		if (instance != null) {
-			try {
-				String tag = System.getProperty(LogEntry.TAG_SYSTEM_PROPERTY_NAME);
+	public static void put(LogEntry entry) {
 
-				if (tag != null) {
-					entry.setTag(tag);
-				}
-
-				instance.logger.put(entry.toLogString());
-				instance.logger.flush();
-			} catch (IOException e) {
-				systemLogger.error("Writing log failed.", e);
-			}
+		if (instance == null) {
+			return;
 		}
+
+		String tag = System.getProperty(LogEntry.TAG_SYSTEM_PROPERTY_NAME);
+
+		if (tag != null) {
+			entry.setTag(tag);
+		}
+
+		logQueue.offer(entry);
 	}
 
 	/**
@@ -176,24 +218,20 @@ public class LogWriter {
 		putSimpleInfo(logType, value);
 	}
 
-	private static synchronized void putSimpleInfo(String logType, String value) {
+	private static void putSimpleInfo(String logType, String value) {
 
-		if (instance != null) {
-
-			String log = new StringBuilder()
-				.append(logType)
-				.append(csvStrategy.getDelimiter())
-				.append(csvStrategy.escape(value))
-				.append(csvStrategy.getDelimiter())
-				.append(LogEntry.END_OF_LINE)
-				.toString();
-
-			try {
-				instance.logger.put(log);
-				instance.logger.flush();
-			} catch (IOException e) {
-				systemLogger.error("Writing log failed.", e);
-			}
+		if (instance == null) {
+			return;
 		}
+
+		String log = new StringBuilder()
+			.append(logType)
+			.append(csvStrategy.getDelimiter())
+			.append(csvStrategy.escape(value))
+			.append(csvStrategy.getDelimiter())
+			.append(LogEntry.END_OF_LINE)
+			.toString();
+
+		logQueue.offer(log);
 	}
 }
