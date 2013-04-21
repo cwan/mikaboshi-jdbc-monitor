@@ -142,7 +142,14 @@ public class LogWriter {
 			return;
 		}
 
-		String tag = System.getProperty(LogEntry.TAG_SYSTEM_PROPERTY_NAME);
+		String tag = null;
+
+		tag = Tag.getInstance().get();
+
+		if (tag == null || tag.isEmpty()) {
+			// 非推奨の方法
+			tag = System.getProperty(LogEntry.TAG_SYSTEM_PROPERTY_NAME);
+		}
 
 		if (tag != null) {
 			entry.setTag(tag);
@@ -234,4 +241,5 @@ public class LogWriter {
 
 		logQueue.offer(log);
 	}
+
 }
