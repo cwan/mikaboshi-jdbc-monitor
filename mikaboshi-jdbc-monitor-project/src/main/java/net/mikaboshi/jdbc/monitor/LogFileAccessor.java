@@ -34,7 +34,7 @@ public class LogFileAccessor {
 	 */
 	private static final int READ_AHEAD_LIMIT = 819200;
 
-	private String logFilePath;
+	private File logFile;
 	private String logFileCharset;
 	private String indicatedLogFileCharset;
 
@@ -64,7 +64,7 @@ public class LogFileAccessor {
 	private InputStream logFileInputStream;
 	private int lineCount = 0;
 	private boolean charsetIsSet = false;
-	private RandomAccessFile logFile;
+	private RandomAccessFile randomAccessLogFile;
 
 	private long filePointer = 0L;
 
@@ -73,7 +73,8 @@ public class LogFileAccessor {
 	}
 
 	public LogFileAccessor(File logFile, String logFileCharset) {
-		this.logFilePath = logFile.getAbsolutePath();
+
+		this.logFile = logFile;
 		this.logFileCharset = logFileCharset;
 		this.indicatedLogFileCharset = logFileCharset;
 
@@ -94,7 +95,7 @@ public class LogFileAccessor {
 	 * @return
 	 */
 	public boolean existsLogFile() {
-		return new File(this.logFilePath).exists();
+		return this.logFile.exists();
 	}
 
 	/**
@@ -107,7 +108,7 @@ public class LogFileAccessor {
 	 */
 	public synchronized LogEntry readNextLog() throws IOException {
 
-		long logFileLength = new File(this.logFilePath).length();
+		long logFileLength = this.logFile.length();
 
 		// ファイルサイズが前回より増えていない場合は読み込まない
 		if ( this.noLog && this.fileSize == logFileLength ) {
@@ -255,17 +256,17 @@ public class LogFileAccessor {
 			return;
 		}
 
-		this.logFile = new RandomAccessFile(this.logFilePath, "r");
+		this.randomAccessLogFile = new RandomAccessFile(this.logFile, "r");
 
-		if (this.filePointer > this.logFile.length()) {
+		if (this.filePointer > this.randomAccessLogFile.length()) {
 			this.filePointer = 0L;
 		}
 
 		if (this.filePointer > 0L) {
-			this.logFile.seek(this.filePointer);
+			this.randomAccessLogFile.seek(this.filePointer);
 		}
 
-		this.logFileInputStream = new BufferedInputStream(new FileInputStream(this.logFile.getFD()));
+		this.logFileInputStream = new BufferedInputStream(new FileInputStream(this.randomAccessLogFile.getFD()));
 
 		String charset = StringUtils.isNotBlank(this.logFileCharset) ? this.logFileCharset : Charset.defaultCharset().name();
 
@@ -292,8 +293,8 @@ public class LogFileAccessor {
 		IOUtils.closeQuietly(this.logFileInputStream);
 		this.logFileInputStream = null;
 
-		IOUtils.closeQuietly(this.logFile);
-		this.logFile = null;
+		IOUtils.closeQuietly(this.randomAccessLogFile);
+		this.randomAccessLogFile = null;
 	}
 
 	/**
@@ -309,7 +310,7 @@ public class LogFileAccessor {
 			return;
 		}
 
-		this.filePointer = this.logFile.getFilePointer();
+		this.filePointer = this.randomAccessLogFile.getFilePointer();
 
 		close();
 	}
