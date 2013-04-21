@@ -130,7 +130,7 @@ public class SqlUtilsTest extends TestCase {
 		boundParameters.put(1, date);
 
 		String sql		= "insert into hoge value (?)";
-		String expected	= "insert into hoge value ('" +  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date(now)) + "')";
+		String expected	= "insert into hoge value ('" +  new SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(now)) + "')";
 
 		assertEquals(expected, SqlUtils.replaceParameters(sql, boundParameters));
 	}

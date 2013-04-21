@@ -1,8 +1,5 @@
 package net.mikaboshi.jdbc.monitor;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -56,7 +53,9 @@ public class SqlUtils {
 		boolean isInQuote = false;
 
 		for (char c : sql.toCharArray()) {
+
 			if (!isInQuote && c == '?') {
+
 				Object param = boundParameters.get(parameterIndex++);
 
 				if (param == null) {
@@ -65,57 +64,54 @@ public class SqlUtils {
 				} else if (param instanceof Number) {
 					sb.append(param);
 
+				} else if (param instanceof java.sql.Timestamp) {
+
+					sb.append('\'');
+					sb.append(timestampFormat.format(param));
+
+					int nanos = ((Timestamp) param).getNanos();
+
+					String s;
+
+					synchronized (nanosFormat) {
+						s = nanosFormat.format(nanos);
+					}
+
+					sb.append(s);
+					sb.append('\'');
+
+				} else if (param instanceof java.sql.Time) {
+
+					sb.append('\'');
+					sb.append(timeFormat.format(param));
+					sb.append('\'');
+
+				} else if (param instanceof java.sql.Date) {
+
+					sb.append('\'');
+					sb.append(dateFormat.format(param));
+					sb.append('\'');
+
+				} else if (param instanceof java.util.Date) {
+
+					sb.append('\'');
+					sb.append(dateFormat.format(param));
+					sb.append('\'');
+
 				} else {
 
-					if (param instanceof java.sql.Timestamp) {
+					sb.append('\'');
 
-						sb.append('\'');
-						sb.append(timestampFormat.format(param));
+					for (char ch : param.toString().toCharArray()) {
 
-						int nanos = ((Timestamp) param).getNanos();
-
-						String s;
-
-						synchronized (nanosFormat) {
-							s = nanosFormat.format(nanos);
+						if (ch == '\'') {
+							sb.append('\'');
 						}
 
-						sb.append(s);
-						sb.append('\'');
-
-					} else if (param instanceof java.sql.Time) {
-
-						sb.append('\'');
-						sb.append(timeFormat.format(param));
-						sb.append('\'');
-
-					} else if (param instanceof java.sql.Date) {
-
-						sb.append('\'');
-						sb.append(timestampFormat.format(param));
-						sb.append('\'');
-
-					} else if (param instanceof java.util.Date) {
-
-						sb.append('\'');
-						sb.append(dateFormat.format(param));
-						sb.append('\'');
-
-					} else {
-
-						sb.append('\'');
-
-						for (char ch : param.toString().toCharArray()) {
-
-							if (ch == '\'') {
-								sb.append('\'');
-							}
-
-							sb.append(ch);
-						}
-
-						sb.append('\'');
+						sb.append(ch);
 					}
+
+					sb.append('\'');
 				}
 
 			} else {
@@ -145,46 +141,6 @@ public class SqlUtils {
 		String[] tokenize = new SQLFormatter().tokenize(sql);
 
 		return StringUtils.join(tokenize, ' ');
-	}
-
-	/**
-	 * 日時や数値のパラメータをSQL形式の文字列に変換する。
-	 * @param o
-	 * @return
-	 */
-	public static String formatParameter(Object o) {
-
-		if (o == null) {
-			return "null";
-		}
-
-		if (o instanceof Date) {
-			return dateFormat.format(o);
-		}
-
-		if (o instanceof Time) {
-			return timeFormat.format(o);
-		}
-
-		if (o instanceof Timestamp) {
-			int nanos = ((Timestamp) o).getNanos();
-
-			String s1 = timestampFormat.format(o);
-
-			String s2;
-
-			synchronized (nanosFormat) {
-				s2 = nanosFormat.format(nanos);
-			}
-
-			return s1 + s2;
-		}
-
-		if (o instanceof BigDecimal) {
-			return ((BigDecimal) o).toPlainString();
-		}
-
-		return o.toString();
 	}
 
 	static {
