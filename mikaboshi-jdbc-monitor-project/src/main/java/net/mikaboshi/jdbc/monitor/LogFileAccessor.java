@@ -66,6 +66,8 @@ public class LogFileAccessor {
 	private boolean charsetIsSet = false;
 	private RandomAccessFile logFile;
 
+	private long filePointer = 0L;
+
 	public LogFileAccessor(String logFilePath, String logFileCharset) {
 		this(new File(logFilePath), logFileCharset);
 	}
@@ -105,12 +107,6 @@ public class LogFileAccessor {
 	 */
 	public synchronized LogEntry readNextLog() throws IOException {
 
-		if ( this.logFileReader == null ) {
-			open();
-		}
-
-		this.lineCount++;
-
 		long logFileLength = new File(this.logFilePath).length();
 
 		// ファイルサイズが前回より増えていない場合は読み込まない
@@ -118,10 +114,15 @@ public class LogFileAccessor {
 			return null;
 		}
 
+		if ( this.logFileReader == null ) {
+			open();
+		}
+
 		// ファイルのサイズが減っていた場合は読み直す
 		// （FileDialogを表示したときになぜか0になるため、それは除外する）
 		if ( this.fileSize > logFileLength && logFileLength != 0 ) {
 			close();
+			this.filePointer = 0L;
 			open();
 		}
 
@@ -131,6 +132,7 @@ public class LogFileAccessor {
 
 		if ( !this.csvLineIterator.hasNext() ) {
 			this.noLog = true;
+			unlock();
 			return null;
 		}
 
@@ -138,10 +140,13 @@ public class LogFileAccessor {
 
 		String[] items = this.csvLineIterator.next();
 
-		if ( items == null) {
+		if (items == null) {
 			this.noLog = true;
+			unlock();
 			return null;
 		}
+
+		this.lineCount++;
 
 		this.noLog = false;
 
@@ -167,6 +172,7 @@ public class LogFileAccessor {
 				this.logFileCharset = items[1];
 
 				close();
+				this.filePointer = 0L;
 				open();
 
 				this.charsetIsSet = true;
@@ -251,6 +257,14 @@ public class LogFileAccessor {
 
 		this.logFile = new RandomAccessFile(this.logFilePath, "r");
 
+		if (this.filePointer > this.logFile.length()) {
+			this.filePointer = 0L;
+		}
+
+		if (this.filePointer > 0L) {
+			this.logFile.seek(this.filePointer);
+		}
+
 		this.logFileInputStream = new BufferedInputStream(new FileInputStream(this.logFile.getFD()));
 
 		String charset = StringUtils.isNotBlank(this.logFileCharset) ? this.logFileCharset : Charset.defaultCharset().name();
@@ -261,8 +275,10 @@ public class LogFileAccessor {
 		this.csvLineIterator = (StandardCSVStrategy.CSVIterator)
 			this.csvStrategy.csvLines(this.logFileReader).iterator();
 
-		this.fileSize = -1;
-		this.lineCount = 0;
+		if (this.filePointer == 0L) {
+			this.fileSize = -1;
+			this.lineCount = 0;
+		}
 	}
 
 	/**
@@ -280,5 +296,22 @@ public class LogFileAccessor {
 		this.logFile = null;
 	}
 
+	/**
+	 * ファイルを閉じてロックを解除する。
+	 *
+	 * @throws IOException
+	 * @since 1.4.2
+	 */
+	private void unlock() throws IOException {
+
+		if ( this.logFileReader == null ) {
+			logger.warn("LogFileAccessor#unlock is called while the file is closed.");
+			return;
+		}
+
+		this.filePointer = this.logFile.getFilePointer();
+
+		close();
+	}
 
 }
