@@ -7,6 +7,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -16,6 +18,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import net.mikaboshi.gui.GuiUtils;
+import net.mikaboshi.jdbc.monitor.ViewerConfig;
+import net.mikaboshi.jdbc.monitor.ViewerConfig.LogTableSearch;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -35,11 +39,11 @@ public class SearchDialog extends JDialog {
 	private JCheckBox circulatingCheckBox = null;
 	private JdbcLogViewerFrame opener = null;
 	private JCheckBox caseSensitiveCheckBox = null;
-	
+
 	/**
-	 * This method initializes regularExpressionCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes regularExpressionCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getRegularExpressionCheckBox() {
 		if (regularExpressionCheckBox == null) {
@@ -53,9 +57,9 @@ public class SearchDialog extends JDialog {
 
 
 	/**
-	 * This method initializes searchWordComboBox	
-	 * 	
-	 * @return javax.swing.JComboBox	
+	 * This method initializes searchWordComboBox
+	 *
+	 * @return javax.swing.JComboBox
 	 */
 	private JComboBox getSearchWordComboBox() {
 		if (searchWordComboBox == null) {
@@ -67,9 +71,9 @@ public class SearchDialog extends JDialog {
 
 
 	/**
-	 * This method initializes circulatingCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes circulatingCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getCirculatingCheckBox() {
 		if (circulatingCheckBox == null) {
@@ -80,7 +84,7 @@ public class SearchDialog extends JDialog {
 		}
 		return circulatingCheckBox;
 	}
-	
+
 	/**
 	 * @param owner
 	 */
@@ -93,25 +97,39 @@ public class SearchDialog extends JDialog {
 
 	/**
 	 * This method initializes this
-	 * 
+	 *
 	 * @return void
 	 */
 	private void initialize() {
 		this.setSize(461, 198);
 		this.setTitle("SearchDialog.title");
-		
+
 		this.setContentPane(getJContentPane());
-		
+
 		this.addWindowListener(new java.awt.event.WindowAdapter() {
 			public void windowActivated(java.awt.event.WindowEvent e) {
 				getSearchWordComboBox().requestFocusInWindow();
 			}
 		});
+
+		// 設定を読み込む
+		LogTableSearch config = ViewerConfig.getInstance().getLogTableSearch();
+
+		if (!config.getSearchWord().isEmpty()) {
+
+			for (String word : config.getSearchWord()) {
+				getSearchWordComboBox().addItem(word);
+			}
+		}
+
+		getRegularExpressionCheckBox().setSelected(config.isRegularExpression());
+		getCirculatingCheckBox().setSelected(config.isCirculating());
+		getCaseSensitiveCheckBox().setSelected(config.isCaseSensitive());
 	}
 
 	/**
 	 * This method initializes jContentPane
-	 * 
+	 *
 	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJContentPane() {
@@ -123,7 +141,7 @@ public class SearchDialog extends JDialog {
 			jContentPane.setLayout(borderLayout);
 			jContentPane.add(getMainPanel(), BorderLayout.CENTER);
 			jContentPane.add(getButtonsPanel(), BorderLayout.SOUTH);
-			
+
 			// ESCで閉じる
 			GuiUtils.closeByESC(this, jContentPane);
 		}
@@ -131,9 +149,9 @@ public class SearchDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes mainPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes mainPanel
+	 *
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getMainPanel() {
 		if (mainPanel == null) {
@@ -180,9 +198,9 @@ public class SearchDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes buttonsPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes buttonsPanel
+	 *
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getButtonsPanel() {
 		if (buttonsPanel == null) {
@@ -207,9 +225,9 @@ public class SearchDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes searchForwardButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes searchForwardButton
+	 *
+	 * @return javax.swing.JButton
 	 */
 	private JButton getSearchForwardButton() {
 		if (searchForwardButton == null) {
@@ -217,11 +235,11 @@ public class SearchDialog extends JDialog {
 			searchForwardButton.setText("SearchDialog.searchForwardButton");
 			searchForwardButton.setMnemonic(KeyEvent.VK_F);
 			searchForwardButton.setToolTipText("SearchDialog.searchForwardButton.tooltip");
-			
+
 			searchForwardButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					opener.search(
-							getSearchWordComboBox().getSelectedItem().toString(), 
+							getSearchWordComboBox().getSelectedItem().toString(),
 							getRegularExpressionCheckBox().isSelected(),
 							true,
 							getCirculatingCheckBox().isSelected(),
@@ -234,9 +252,9 @@ public class SearchDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes searchBackButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes searchBackButton
+	 *
+	 * @return javax.swing.JButton
 	 */
 	private JButton getSearchBackButton() {
 		if (searchBackButton == null) {
@@ -244,11 +262,11 @@ public class SearchDialog extends JDialog {
 			searchBackButton.setText("SearchDialog.searchBackButton");
 			searchBackButton.setMnemonic(KeyEvent.VK_B);
 			searchBackButton.setToolTipText("SearchDialog.searchBackButton.tooltip");
-			
+
 			searchBackButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					opener.search(
-							getSearchWordComboBox().getSelectedItem().toString(), 
+							getSearchWordComboBox().getSelectedItem().toString(),
 							getRegularExpressionCheckBox().isSelected(),
 							false,
 							getCirculatingCheckBox().isSelected(),
@@ -261,9 +279,9 @@ public class SearchDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes markButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes markButton
+	 *
+	 * @return javax.swing.JButton
 	 */
 	private JButton getMarkButton() {
 		if (markButton == null) {
@@ -271,7 +289,7 @@ public class SearchDialog extends JDialog {
 			markButton.setText("SearchDialog.markButton");
 			markButton.setToolTipText("SearchDialog.markButton.tooltip");
 			markButton.setMnemonic(KeyEvent.VK_M);
-			
+
 			markButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					opener.searchAndMark(
@@ -287,9 +305,9 @@ public class SearchDialog extends JDialog {
 	}
 
 	/**
-	 * This method initializes closeButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes closeButton
+	 *
+	 * @return javax.swing.JButton
 	 */
 	private JButton getCloseButton() {
 		if (closeButton == null) {
@@ -304,38 +322,38 @@ public class SearchDialog extends JDialog {
 		}
 		return closeButton;
 	}
-	
+
 	private void addCurrentItem() {
-		
+
 		if (getSearchWordComboBox().getSelectedIndex() != -1) {
 			return;
 		}
-		
+
 		String word = getSearchWordComboBox().getSelectedItem().toString();
-		
+
 		if (StringUtils.isEmpty(word)) {
 			return;
 		}
-		
+
 		// 既存項目のチェック
 		for (int i = 0; i < getSearchWordComboBox().getItemCount(); i++) {
 			String item = getSearchWordComboBox().getItemAt(i).toString();
-			
+
 			if (word.equals(item)) {
 				getSearchWordComboBox().remove(i);
 				break;
 			}
 		}
-		
+
 		// 先頭に追加する
 		getSearchWordComboBox().insertItemAt(word, 0);
 	}
 
 
 	/**
-	 * This method initializes caseSensitiveCheckBox	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes caseSensitiveCheckBox
+	 *
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getCaseSensitiveCheckBox() {
 		if (caseSensitiveCheckBox == null) {
@@ -345,6 +363,29 @@ public class SearchDialog extends JDialog {
 			caseSensitiveCheckBox.setText("SearchDialog.caseSensitiveCheckBox");
 		}
 		return caseSensitiveCheckBox;
+	}
+
+	/**
+	 * 設定を保存する。
+	 * @since 1.4.2
+	 */
+	protected void saveConfig() {
+
+		// 設定を読み込む
+		LogTableSearch config = ViewerConfig.getInstance().getLogTableSearch();
+
+		List<String> searchWord = new ArrayList<String>();
+
+		// 16個まで保存する
+		for (int i = 0, len = getSearchWordComboBox().getItemCount(); i < len && i < 16; i++) {
+
+			searchWord.add(getSearchWordComboBox().getItemAt(i).toString());
+		}
+
+		config.setSearchWord(searchWord);
+		config.setRegularExpression(getRegularExpressionCheckBox().isSelected());
+		config.setCirculating(getCirculatingCheckBox().isSelected());
+		config.setCaseSensitive(getCaseSensitiveCheckBox().isSelected());
 	}
 
 }  //  @jve:decl-index=0:visual-constraint="10,24"

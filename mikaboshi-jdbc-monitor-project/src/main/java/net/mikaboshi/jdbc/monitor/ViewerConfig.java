@@ -3,6 +3,8 @@ package net.mikaboshi.jdbc.monitor;
 import java.awt.Dimension;
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -64,6 +66,9 @@ public class ViewerConfig {
 
 	/** DB接続設定 */
 	private ConnectInfo connectInfo = new ConnectInfo();
+
+	/** ログテーブル検索設定 */
+	private LogTableSearch logTableSearch = new LogTableSearch();
 
 	public static synchronized ViewerConfig getInstance() {
 
@@ -179,6 +184,14 @@ public class ViewerConfig {
 
 	public void setConnectInfo(ConnectInfo connectInfo) {
 		this.connectInfo = connectInfo;
+	}
+
+	public LogTableSearch getLogTableSearch() {
+		return logTableSearch;
+	}
+
+	public void setLogTableSearch(LogTableSearch logTableSearch) {
+		this.logTableSearch = logTableSearch;
 	}
 
 	@Override
@@ -843,6 +856,62 @@ public class ViewerConfig {
 
 		public void setPassword(String password) {
 			this.password = password;
+		}
+
+		@Override
+		public String toString() {
+			return ToStringBuilder.reflectionToString(this);
+		}
+	}
+
+	/**
+	 * ログテーブル検索ダイアログの設定
+	 * @since 1.4.2
+	 */
+	public static class LogTableSearch {
+
+		/** 検索ワード */
+		private List<String> searchWord = new ArrayList<String>();
+
+		/** 正規表現 */
+		private boolean regularExpression = false;
+
+		/** 循環検索 */
+		private boolean circulating = false;
+
+		/** 大文字/小文字を区別する */
+		private boolean caseSensitive = false;
+
+		public List<String> getSearchWord() {
+			return searchWord;
+		}
+
+		public void setSearchWord(List<String> searchWord) {
+			this.searchWord = searchWord;
+		}
+
+		public boolean isRegularExpression() {
+			return regularExpression;
+		}
+
+		public void setRegularExpression(boolean regularExpression) {
+			this.regularExpression = regularExpression;
+		}
+
+		public boolean isCirculating() {
+			return circulating;
+		}
+
+		public void setCirculating(boolean circulating) {
+			this.circulating = circulating;
+		}
+
+		public boolean isCaseSensitive() {
+			return caseSensitive;
+		}
+
+		public void setCaseSensitive(boolean caseSensitive) {
+			this.caseSensitive = caseSensitive;
 		}
 
 		@Override

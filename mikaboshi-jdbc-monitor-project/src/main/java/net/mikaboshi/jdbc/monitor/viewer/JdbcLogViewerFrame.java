@@ -1946,6 +1946,11 @@ public class JdbcLogViewerFrame extends JFrame {
 				// ステータスバー
 				frame.setStatusBar(getStatusBarCheckBoxMenuItem().isSelected());
 
+				// 検索
+				if (JdbcLogViewerFrame.this.searchDialog != null) {
+					JdbcLogViewerFrame.this.searchDialog.saveConfig();
+				}
+
 				config.store();
 			}
 		});
