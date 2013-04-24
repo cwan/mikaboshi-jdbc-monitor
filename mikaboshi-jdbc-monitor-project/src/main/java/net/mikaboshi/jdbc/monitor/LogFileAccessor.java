@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -256,7 +257,28 @@ public class LogFileAccessor {
 			return;
 		}
 
-		this.randomAccessLogFile = new RandomAccessFile(this.logFile, "r");
+		for (int i = 1; i <= 5; i++) {
+			// ローテーション時など一時的にファイルが存在しない場合があるため、リトライを行う
+
+			try {
+				this.randomAccessLogFile = new RandomAccessFile(this.logFile, "r");
+				break;
+
+			} catch (FileNotFoundException e) {
+				if (i == 5) {
+					throw e;
+				}
+
+				logger.warn("Log file is not found. (" + i + ")", e);
+
+				try {
+					Thread.sleep(100 * i);
+				} catch (InterruptedException e1) {
+					logger.error(e1.getMessage(), e1);
+				}
+			}
+		}
+
 
 		if (this.filePointer > this.randomAccessLogFile.length()) {
 			this.filePointer = 0L;
