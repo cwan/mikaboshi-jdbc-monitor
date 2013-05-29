@@ -19,21 +19,29 @@ import blanco.commons.sql.format.BlancoSqlRule;
 /**
  * SQLに関するユーティリティクラス。
  * @author Takuma Umezawa
- *
+ * @version 1.4.3
  */
 public class SqlUtils {
 
 	private static final Log logger = LogFactory.getLog(SqlUtils.class);
 
-	private static final BlancoSqlFormatter formatter;
+	private static final BlancoSqlFormatter SQL_FORMATTER;
 
-	private static final Format dateFormat = FastDateFormat.getInstance("yyyy-MM-dd");
+	private static final Format DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd");
 
-	private static final Format timeFormat = FastDateFormat.getInstance("HH:mm:ss");
+	private static final Format TIME_FORMAT = FastDateFormat.getInstance("HH:mm:ss");
 
-	private static final Format timestampFormat = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
+	private static final Format TIMESTAMP_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
 
-	private static final Format nanosFormat = new DecimalFormat("'.'000000000");
+	private static final Format NANOS_FORMAT = new DecimalFormat("'.'000000000");
+
+	static {
+
+		BlancoSqlRule blancoSqlRule = new BlancoSqlRule();
+		blancoSqlRule.setKeywordCase(BlancoSqlRule.KEYWORD_UPPER_CASE);
+
+		SQL_FORMATTER = new BlancoSqlFormatter(blancoSqlRule);
+	}
 
 	/**
 	 * PreparedStatementの?を、実パラメータに変換する。
@@ -57,62 +65,7 @@ public class SqlUtils {
 			if (!isInQuote && c == '?') {
 
 				Object param = boundParameters.get(parameterIndex++);
-
-				if (param == null) {
-					sb.append("null");
-
-				} else if (param instanceof Number) {
-					sb.append(param);
-
-				} else if (param instanceof java.sql.Timestamp) {
-
-					sb.append('\'');
-					sb.append(timestampFormat.format(param));
-
-					int nanos = ((Timestamp) param).getNanos();
-
-					String s;
-
-					synchronized (nanosFormat) {
-						s = nanosFormat.format(nanos);
-					}
-
-					sb.append(s);
-					sb.append('\'');
-
-				} else if (param instanceof java.sql.Time) {
-
-					sb.append('\'');
-					sb.append(timeFormat.format(param));
-					sb.append('\'');
-
-				} else if (param instanceof java.sql.Date) {
-
-					sb.append('\'');
-					sb.append(dateFormat.format(param));
-					sb.append('\'');
-
-				} else if (param instanceof java.util.Date) {
-
-					sb.append('\'');
-					sb.append(dateFormat.format(param));
-					sb.append('\'');
-
-				} else {
-
-					sb.append('\'');
-
-					for (char ch : param.toString().toCharArray()) {
-
-						if (ch == '\'') {
-							sb.append('\'');
-						}
-
-						sb.append(ch);
-					}
-
-					sb.append('\'');
-				}
+				sb.append(toLiteral(param, true));
 
 			} else {
 				sb.append(c);
@@ -121,6 +74,75 @@ public class SqlUtils {
 			if (c == '\'') {
 				isInQuote = !isInQuote;
 			}
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * オブジェクトをリテラル表現にする。
+	 * @param arg
+	 * @param quote
+	 * @return
+	 * @version 1.4.3
+	 */
+	public static String toLiteral(Object arg, boolean quote) {
+
+		if (arg == null) {
+			return "null";
+		}
+
+		if (arg instanceof Number) {
+			return arg.toString();
+		}
+
+		StringBuilder sb = new StringBuilder();
+
+		if (quote) {
+			sb.append('\'');
+		}
+
+		if (arg instanceof java.util.Date) {
+
+			if (arg instanceof java.sql.Timestamp) {
+
+				sb.append(TIMESTAMP_FORMAT.format(arg));
+
+				int nanos = ((Timestamp) arg).getNanos();
+
+				synchronized (NANOS_FORMAT) {
+					sb.append(NANOS_FORMAT.format(nanos));
+				}
+
+			} else if (arg instanceof java.sql.Time) {
+
+				sb.append(TIME_FORMAT.format(arg));
+
+			} else {
+
+				sb.append(DATE_FORMAT.format(arg));
+			}
+
+		} else {
+
+			if (quote) {
+				// エスケープ要
+				for (char ch : arg.toString().toCharArray()) {
+
+					if (ch == '\'') {
+						sb.append('\'');
+					}
+
+					sb.append(ch);
+				}
+
+			} else {
+				sb.append(arg.toString());
+			}
+		}
+
+		if (quote) {
+			sb.append('\'');
 		}
 
 		return sb.toString();
@@ -143,15 +165,6 @@ public class SqlUtils {
 		return StringUtils.join(tokenize, ' ');
 	}
 
-	static {
-
-		BlancoSqlRule blancoSqlRule = new BlancoSqlRule();
-		blancoSqlRule.setKeywordCase(BlancoSqlRule.KEYWORD_UPPER_CASE);
-
-		formatter = new BlancoSqlFormatter(blancoSqlRule);
-
-	}
-
 	/**
 	 * SQLをフォーマットする
 	 * @param sql
@@ -165,7 +178,7 @@ public class SqlUtils {
 		}
 
 		try {
-			return formatter.format(sql);
+			return SQL_FORMATTER.format(sql);
 
 		} catch (BlancoSqlFormatterException e) {
 
