@@ -10,4 +10,4 @@ done
 
 export CLASSPATH
 
-java net.mikaboshi.JdbcLogViewer $1 &
+java -Doracle.jdbc.mapDateToTimestamp=false net.mikaboshi.JdbcLogViewer $1 &
