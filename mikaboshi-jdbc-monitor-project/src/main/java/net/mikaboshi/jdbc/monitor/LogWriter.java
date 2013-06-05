@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
  * </p>
  *
  * @author Takuma Umezawa
+ * @version 1.4.3
  *
  */
 public class LogWriter {
@@ -113,17 +114,22 @@ public class LogWriter {
 						continue;
 					}
 
-					try {
-						if (log instanceof LogEntry) {
-							instance.logger.put(((LogEntry) log).toLogString());
-						} else if (log instanceof String) {
-							instance.logger.put((String) log);
-						}
+					write(log);
+				}
+			}
+		});
 
-						instance.logger.flush();
-					} catch (IOException e) {
-						systemLogger.error("Writing log failed.", e);
-					}
+		// プロセス停止時にキューのログを出し切る
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+
+			@Override
+			public void run() {
+
+				Object log = null;
+
+				while ((log = logQueue.poll()) != null) {
+
+					write(log);
 				}
 			}
 		});
@@ -240,6 +246,22 @@ public class LogWriter {
 			.toString();
 
 		logQueue.offer(log);
+	}
+
+	private static void write(Object log) {
+
+		try {
+			if (log instanceof LogEntry) {
+				instance.logger.put(((LogEntry) log).toLogString());
+			} else if (log instanceof String) {
+				instance.logger.put((String) log);
+			}
+
+			instance.logger.flush();
+
+		} catch (IOException e) {
+			systemLogger.error("Writing log failed.", e);
+		}
 	}
 
 }
