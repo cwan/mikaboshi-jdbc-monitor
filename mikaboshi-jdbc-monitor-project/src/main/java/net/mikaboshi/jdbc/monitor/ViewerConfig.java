@@ -27,9 +27,16 @@ import org.apache.commons.logging.LogFactory;
  * ログビューアの設定
  * @author Takuma Umezawa
  * @since 1.3.0
+ * @version 1.4.3
  */
 @XmlRootElement(name = "config")
 public class ViewerConfig {
+
+	public enum FormatType {
+		FORMAT,
+		RAW,
+		LINE
+	}
 
 	private static ViewerConfig INSTANCE;
 
@@ -43,8 +50,8 @@ public class ViewerConfig {
 
 	private ViewerConfig() {};
 
-	/** 詳細画面でSQLをフォーマットするかどうか */
-	private boolean detailSqlFormat = true;
+	/** SQLのフォーマット種別 */
+	private FormatType formatType = FormatType.FORMAT;
 
 	/** SQL実行の上限 */
 	private int limitExecuteSqlRows = 100;
@@ -121,12 +128,30 @@ public class ViewerConfig {
 		}
 	}
 
-	public boolean isDetailSqlFormat() {
-		return detailSqlFormat;
+	@XmlTransient
+	public FormatType getFormatTypeAsEnum() {
+		return formatType;
 	}
 
-	public void setDetailSqlFormat(boolean detailSqlFormat) {
-		this.detailSqlFormat = detailSqlFormat;
+	@XmlTransient
+	public void setFormatTypeByEnum(FormatType formatType) {
+		this.formatType = formatType;
+	}
+
+	public String getFormatType() {
+		return formatType.toString();
+	}
+
+	public void setFormatType(String arg) {
+
+		for (FormatType formatType : FormatType.values()) {
+			if (formatType.toString().equals(arg)) {
+				this.formatType = formatType;
+				return;
+			}
+		}
+
+		this.formatType = null;
 	}
 
 	public int getLimitExecuteSqlRows() {

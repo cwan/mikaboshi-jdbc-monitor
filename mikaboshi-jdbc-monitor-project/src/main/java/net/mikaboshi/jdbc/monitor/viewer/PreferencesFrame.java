@@ -7,12 +7,14 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.nio.charset.Charset;
 
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -20,7 +22,13 @@ import net.mikaboshi.gui.GuiUtils;
 import net.mikaboshi.gui.IntegerInputVerifier;
 import net.mikaboshi.jdbc.monitor.M17N;
 import net.mikaboshi.jdbc.monitor.ViewerConfig;
+import net.mikaboshi.jdbc.monitor.ViewerConfig.FormatType;
 
+/**
+ * 設定フレーム
+ *
+ * @version 1.4.3
+ */
 public class PreferencesFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -33,7 +41,10 @@ public class PreferencesFrame extends JFrame {
 	private JButton cancelButton = null;
 
 	private JLabel detailSqlFormatLabel = null;
-	private JCheckBox formatSqlCheckBox = null;
+	private JRadioButton formatSqlRadioButton = null;
+	private JRadioButton linezeSqlRadioButton = null;
+	private JRadioButton rawSqlRadioButton = null;
+	private JPanel formatSqlRadioButtonsPanel;
 
 	/**
 	 * This is the default constructor
@@ -49,7 +60,7 @@ public class PreferencesFrame extends JFrame {
 	 * @return void
 	 */
 	private void initialize() {
-		this.setSize(410, 200);
+		this.setSize(440, 200);
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setContentPane(getJContentPane());
 		this.setTitle("PreferencesFrame.title");
@@ -129,7 +140,19 @@ public class PreferencesFrame extends JFrame {
 			jContentPane.add(getOkButton(), gridBagConstraints4);
 			jContentPane.add(getCancelButton(), gridBagConstraints5);
 			jContentPane.add(detailSqlFormatLabel, gridBagConstraints12);
-			jContentPane.add(getFormatSqlCheckBox(), gridBagConstraints21);
+
+			formatSqlRadioButtonsPanel = new JPanel();
+			formatSqlRadioButtonsPanel.setLayout(new BoxLayout(formatSqlRadioButtonsPanel, BoxLayout.X_AXIS));
+			formatSqlRadioButtonsPanel.add(getFormatSqlRadioButton());
+			formatSqlRadioButtonsPanel.add(getRawSqlRadioButton());
+			formatSqlRadioButtonsPanel.add(getLinizeSqlRadioButton());
+
+			jContentPane.add(formatSqlRadioButtonsPanel, gridBagConstraints21);
+
+			ButtonGroup formatSqlButtonGroup = new ButtonGroup();
+			formatSqlButtonGroup.add(getFormatSqlRadioButton());
+			formatSqlButtonGroup.add(getRawSqlRadioButton());
+			formatSqlButtonGroup.add(getLinizeSqlRadioButton());
 
 			// ESCで閉じる
 			GuiUtils.closeByESC(this, jContentPane);
@@ -215,8 +238,13 @@ public class PreferencesFrame extends JFrame {
 					logFileConfig.setReadInterval(
 							Long.parseLong(readIntervalTextField.getText()));
 
-					ViewerConfig.getInstance().setDetailSqlFormat(
-							formatSqlCheckBox.isSelected());
+					if (getFormatSqlRadioButton().isSelected()) {
+						ViewerConfig.getInstance().setFormatTypeByEnum(FormatType.FORMAT);
+					} else if (getRawSqlRadioButton().isSelected()) {
+						ViewerConfig.getInstance().setFormatTypeByEnum(FormatType.RAW);
+					} else if (getLinizeSqlRadioButton().isSelected()) {
+						ViewerConfig.getInstance().setFormatTypeByEnum(FormatType.LINE);
+					}
 
 					dispose();
 				}
@@ -243,20 +271,40 @@ public class PreferencesFrame extends JFrame {
 		return cancelButton;
 	}
 
-	/**
-	 * This method initializes formatSqlCheckBox
-	 *
-	 * @return javax.swing.JCheckBox
-	 */
-	private JCheckBox getFormatSqlCheckBox() {
-		if (formatSqlCheckBox == null) {
-			formatSqlCheckBox = new JCheckBox();
-			formatSqlCheckBox.setText("PreferencesFrame.detail_sql_format");
+	private JRadioButton getFormatSqlRadioButton() {
+		if (formatSqlRadioButton == null) {
+			formatSqlRadioButton = new JRadioButton();
+			formatSqlRadioButton.setText("PreferencesFrame.format.format");
 
-			formatSqlCheckBox.setSelected(
-					ViewerConfig.getInstance().isDetailSqlFormat());
+			formatSqlRadioButton.setSelected(
+					ViewerConfig.getInstance().getFormatTypeAsEnum() == FormatType.FORMAT);
 		}
-		return formatSqlCheckBox;
+
+		return formatSqlRadioButton;
+	}
+
+	private JRadioButton getRawSqlRadioButton() {
+		if (rawSqlRadioButton == null) {
+			rawSqlRadioButton = new JRadioButton();
+			rawSqlRadioButton.setText("PreferencesFrame.format.raw");
+
+			rawSqlRadioButton.setSelected(
+					ViewerConfig.getInstance().getFormatTypeAsEnum() == FormatType.RAW);
+		}
+
+		return rawSqlRadioButton;
+	}
+
+	private JRadioButton getLinizeSqlRadioButton() {
+		if (linezeSqlRadioButton == null) {
+			linezeSqlRadioButton = new JRadioButton();
+			linezeSqlRadioButton.setText("PreferencesFrame.format.line");
+
+			linezeSqlRadioButton.setSelected(
+					ViewerConfig.getInstance().getFormatTypeAsEnum() == FormatType.LINE);
+		}
+
+		return linezeSqlRadioButton;
 	}
 
 }  //  @jve:decl-index=0:visual-constraint="1,9"

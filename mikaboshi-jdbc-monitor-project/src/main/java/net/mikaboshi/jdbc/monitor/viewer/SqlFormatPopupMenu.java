@@ -8,24 +8,30 @@ import javax.swing.SwingUtilities;
 import net.mikaboshi.gui.GuiUtils;
 import net.mikaboshi.jdbc.monitor.SqlUtils;
 import net.mikaboshi.jdbc.monitor.ViewerConfig;
+import net.mikaboshi.jdbc.monitor.ViewerConfig.FormatType;
 
 /**
+ * ログ整形ポップアップメニュー
  *
  * @since 1.4.0
+ * @version 1.4.3
  */
 public class SqlFormatPopupMenu extends JPopupMenu {
 
 	private static final long serialVersionUID = 1L;
 
 	private final JTextArea sqlTextArea;
-	private JMenuItem formatSqlMenuItem = null;
-	private JMenuItem serializeSqlMenuItem = null;
+	private JMenuItem formatMenuItem = null;
+	private JMenuItem linizeMenuItem = null;
+	private JMenuItem rawMenuItem = null;
+	private final LogEntryProvider logEntryProvider;
 
-	public SqlFormatPopupMenu(JTextArea sqlTextArea) {
+	public SqlFormatPopupMenu(JTextArea sqlTextArea, LogEntryProvider logEntryProvider) {
 		this.sqlTextArea = sqlTextArea;
+		this.logEntryProvider = logEntryProvider;
 
 		sqlTextArea.addMouseListener(new java.awt.event.MouseAdapter() {
-			// 右クリックしたときに、SQLを整形するか1行表示するか、ポップアップメニューで選択する
+			// 右クリックしたときに、SQLの整形タイプをポップアップメニューで選択する
 			public void mouseClicked(java.awt.event.MouseEvent e) {
 				if (SwingUtilities.isRightMouseButton(e)) {
 					SqlFormatPopupMenu.this.show(e.getComponent(), e.getX(), e.getY());
@@ -33,52 +39,74 @@ public class SqlFormatPopupMenu extends JPopupMenu {
 			}
 		});
 
-		add(getFormatSqlMenuItem());
-		add(getSerializeSqlMenuItem());
+		add(getFormatMenuItem());
+		add(getLinezeMenuItem());
+		add(getRawMenuItem());
 	}
 
 	/**
-	 * This method initializes formatSqlMenuItem
+	 * This method initializes formatMenuItem
 	 *
 	 * @return javax.swing.JMenuItem
 	 */
-	private JMenuItem getFormatSqlMenuItem() {
-		if (formatSqlMenuItem == null) {
-			formatSqlMenuItem = new JMenuItem();
-			formatSqlMenuItem.setText("LogDetailFrame.menu.format");
+	private JMenuItem getFormatMenuItem() {
+		if (formatMenuItem == null) {
+			formatMenuItem = new JMenuItem();
+			formatMenuItem.setText("PreferencesFrame.format.format");
 
-			formatSqlMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			formatMenuItem.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					sqlTextArea.setText(
-							SqlUtils.format(sqlTextArea.getText()));
+							SqlUtils.format(logEntryProvider.getCurrentLogEntry().getSql()));
 					GuiUtils.setCeil(sqlTextArea);
 
-					ViewerConfig.getInstance().setDetailSqlFormat(true);
+					ViewerConfig.getInstance().setFormatTypeByEnum(FormatType.FORMAT);
 				}
 			});
 		}
-		return formatSqlMenuItem;
+		return formatMenuItem;
 	}
 
 	/**
-	 * This method initializes serializeSqlMenuItem
+	 * This method initializes linizeMenuItem
 	 *
 	 * @return javax.swing.JMenuItem
 	 */
-	private JMenuItem getSerializeSqlMenuItem() {
-		if (serializeSqlMenuItem == null) {
-			serializeSqlMenuItem = new JMenuItem();
-			serializeSqlMenuItem.setText("LogDetailFrame.menu.line");
+	private JMenuItem getLinezeMenuItem() {
+		if (linizeMenuItem == null) {
+			linizeMenuItem = new JMenuItem();
+			linizeMenuItem.setText("PreferencesFrame.format.line");
 
-			serializeSqlMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			linizeMenuItem.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					sqlTextArea.setText(
-							SqlUtils.linize(sqlTextArea.getText()));
+							SqlUtils.linize(logEntryProvider.getCurrentLogEntry().getSql()));
 
-					ViewerConfig.getInstance().setDetailSqlFormat(false);
+					ViewerConfig.getInstance().setFormatTypeByEnum(FormatType.LINE);
 				}
 			});
 		}
-		return serializeSqlMenuItem;
+		return linizeMenuItem;
+	}
+
+	/**
+	 * This method initializes rawMenuItem
+	 *
+	 * @return javax.swing.JMenuItem
+	 */
+	private JMenuItem getRawMenuItem() {
+		if (rawMenuItem == null) {
+			rawMenuItem = new JMenuItem();
+			rawMenuItem.setText("PreferencesFrame.format.raw");
+
+			rawMenuItem.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent e) {
+					sqlTextArea.setText(logEntryProvider.getCurrentLogEntry().getSql());
+
+					ViewerConfig.getInstance().setFormatTypeByEnum(FormatType.RAW);
+				}
+			});
+		}
+		return rawMenuItem;
 	}
 }

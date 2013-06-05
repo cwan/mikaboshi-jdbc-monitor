@@ -68,13 +68,19 @@ import net.mikaboshi.jdbc.monitor.Result;
 import net.mikaboshi.jdbc.monitor.SqlUtils;
 import net.mikaboshi.jdbc.monitor.ViewerConfig;
 import net.mikaboshi.jdbc.monitor.ViewerConfig.Filter;
+import net.mikaboshi.jdbc.monitor.ViewerConfig.FormatType;
 import net.mikaboshi.util.ThreadSafeUtils;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class JdbcLogViewerFrame extends JFrame {
+/**
+ * ログビューアフレーム
+ *
+ * @version 1.4.3
+ */
+public class JdbcLogViewerFrame extends JFrame implements LogEntryProvider {
 
 	private static Log systemLogger = LogFactory.getLog(JdbcLogViewerFrame.class);  //  @jve:decl-index=0:
 
@@ -241,7 +247,7 @@ public class JdbcLogViewerFrame extends JFrame {
 			sqlPreviewTextArea.setEditable(false);
 
 			sqlPreviewTextArea.addMouseListener(new java.awt.event.MouseAdapter() {
-				// 右クリックしたときに、SQLを整形するか1行表示するか、ポップアップメニューで選択する
+				// 右クリックしたときに、SQLの整形方法をポップアップメニューで選択する
 				public void mouseClicked(java.awt.event.MouseEvent e) {
 					if (SwingUtilities.isRightMouseButton(e)) {
 						getSqlFormatPopupMenu().show(e.getComponent(), e.getX(), e.getY());
@@ -259,7 +265,7 @@ public class JdbcLogViewerFrame extends JFrame {
 	 */
 	private JPopupMenu getSqlFormatPopupMenu() {
 		if (sqlFormatPopupMenu == null) {
-			sqlFormatPopupMenu = new SqlFormatPopupMenu(getSqlPreviewTextArea());
+			sqlFormatPopupMenu = new SqlFormatPopupMenu(getSqlPreviewTextArea(), this);
 		}
 		return sqlFormatPopupMenu;
 	}
@@ -620,11 +626,15 @@ public class JdbcLogViewerFrame extends JFrame {
 		String sql = StringUtils.EMPTY;
 
 		if (logTable.getSelectedRowCount() == 1) {
-			LogEntry logEntry = getLogTableModel().getLogEntry(logTable.getSelectedRow());
+			LogEntry logEntry = getCurrentLogEntry();
 
 			if (logEntry.getSql() != null) {
-				if (ViewerConfig.getInstance().isDetailSqlFormat()) {
+				FormatType formatType = ViewerConfig.getInstance().getFormatTypeAsEnum();
+
+				if (formatType == null || formatType == FormatType.FORMAT) {
 					sql = SqlUtils.format(logEntry.getSql());
+				} else if (formatType == FormatType.LINE) {
+					sql = SqlUtils.linize(logEntry.getSql());
 				} else {
 					sql = logEntry.getSql();
 				}
@@ -633,6 +643,11 @@ public class JdbcLogViewerFrame extends JFrame {
 
 		getSqlPreviewTextArea().setText(sql);
 		GuiUtils.setCeil(getSqlPreviewTextArea());
+	}
+
+	@Override
+	public LogEntry getCurrentLogEntry() {
+		return getLogTableModel().getLogEntry(logTable.getSelectedRow());
 	}
 
 	/**

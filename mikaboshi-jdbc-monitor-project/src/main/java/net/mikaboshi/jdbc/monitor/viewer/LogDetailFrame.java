@@ -32,10 +32,17 @@ import net.mikaboshi.jdbc.monitor.LogEntry;
 import net.mikaboshi.jdbc.monitor.M17N;
 import net.mikaboshi.jdbc.monitor.SqlUtils;
 import net.mikaboshi.jdbc.monitor.ViewerConfig;
+import net.mikaboshi.jdbc.monitor.ViewerConfig.FormatType;
 
 import org.apache.commons.lang.StringUtils;
 
-public class LogDetailFrame extends JFrame {
+/**
+ * ログ詳細ポップアップ画面
+ *
+ * @version 1.4.3
+ *
+ */
+public class LogDetailFrame extends JFrame implements LogEntryProvider {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -147,12 +154,7 @@ public class LogDetailFrame extends JFrame {
 		if (sqlTextArea == null) {
 			sqlTextArea = new JTextArea();
 
-			if (ViewerConfig.getInstance().isDetailSqlFormat()) {
-				sqlTextArea.setText(
-						SqlUtils.format(this.logEntry.getSql()));
-			} else {
-				sqlTextArea.setText(SqlUtils.linize(this.logEntry.getSql()));
-			}
+			setSql();
 
 			getExecuteSqlButton().setEnabled(
 					StringUtils.isNotBlank(sqlTextArea.getText()));
@@ -218,12 +220,7 @@ public class LogDetailFrame extends JFrame {
 		this.logEntry =
 			this.caller.getLogTableModel().getLogEntry(this.row);
 
-		if (ViewerConfig.getInstance().isDetailSqlFormat()) {
-			sqlTextArea.setText(
-					SqlUtils.format(this.logEntry.getSql()));
-		} else {
-			sqlTextArea.setText(SqlUtils.linize(this.logEntry.getSql()));
-		}
+		setSql();
 
 		getExecuteSqlButton().setEnabled(
 				StringUtils.isNotBlank(sqlTextArea.getText()));
@@ -265,6 +262,20 @@ public class LogDetailFrame extends JFrame {
 		GuiUtils.setCeil(callStackTextArea);
 	}
 
+	private void setSql() {
+
+		FormatType formatType = ViewerConfig.getInstance().getFormatTypeAsEnum();
+
+		if (formatType == null || formatType == FormatType.FORMAT) {
+			sqlTextArea.setText(
+					SqlUtils.format(this.logEntry.getSql()));
+		} else if (formatType == FormatType.LINE) {
+			sqlTextArea.setText(SqlUtils.linize(this.logEntry.getSql()));
+		} else {
+			sqlTextArea.setText(this.logEntry.getSql());
+		}
+	}
+
 	/**
 	 * This method initializes infoTable
 	 *
@@ -301,7 +312,7 @@ public class LogDetailFrame extends JFrame {
 	 */
 	private JPopupMenu getSqlFormatPopupMenu() {
 		if (sqlFormatPopupMenu == null) {
-			sqlFormatPopupMenu = new SqlFormatPopupMenu(getSqlTextArea());
+			sqlFormatPopupMenu = new SqlFormatPopupMenu(getSqlTextArea(), this);
 		}
 		return sqlFormatPopupMenu;
 	}
@@ -579,6 +590,11 @@ public class LogDetailFrame extends JFrame {
 			});
 		}
 		return connectConfigButton;
+	}
+
+	@Override
+	public LogEntry getCurrentLogEntry() {
+		return this.logEntry;
 	}
 
 }  //  @jve:decl-index=0:visual-constraint="10,10"
