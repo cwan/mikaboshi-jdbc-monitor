@@ -71,6 +71,25 @@ public class LogWriter {
 		boolean autoFlush = false;
 
 		this.logger = new SimpleFileLogger(path, append, autoFlush, 32768);
+		this.logger.setCloseOnShutdown(false);
+
+
+		// プロセス停止時にキューのログを出し切る
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+
+			@Override
+			public void run() {
+
+				Object log = null;
+
+				while ((log = logQueue.poll()) != null) {
+
+					write(log);
+				}
+
+				logger.close();
+			}
+		});
 
 		if ("true".equals(System.getProperty(PROP_DELETE_ON_BOOT))) {
 			// 既存のログファイルを削除する
@@ -118,22 +137,6 @@ public class LogWriter {
 				}
 			}
 		});
-
-		// プロセス停止時にキューのログを出し切る
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-
-			@Override
-			public void run() {
-
-				Object log = null;
-
-				while ((log = logQueue.poll()) != null) {
-
-					write(log);
-				}
-			}
-		});
-
 	}
 
 	/**
