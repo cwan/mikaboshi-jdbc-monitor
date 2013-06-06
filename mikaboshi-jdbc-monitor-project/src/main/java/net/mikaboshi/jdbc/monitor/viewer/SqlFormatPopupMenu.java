@@ -40,8 +40,8 @@ public class SqlFormatPopupMenu extends JPopupMenu {
 		});
 
 		add(getFormatMenuItem());
-		add(getLinezeMenuItem());
 		add(getRawMenuItem());
+		add(getLinezeMenuItem());
 	}
 
 	/**
