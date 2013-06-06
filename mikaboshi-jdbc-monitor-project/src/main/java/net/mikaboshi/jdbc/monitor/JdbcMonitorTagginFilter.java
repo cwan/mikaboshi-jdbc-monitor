@@ -5,7 +5,6 @@ import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -15,15 +14,12 @@ import javax.servlet.http.HttpServletRequest;
  * JDBC MonitorのタグにリクエストURIを設定するフィルタ。
  *
  * @author Takuma Umezawa
- * @since 1.4.2
+ * @since 1.4.3
  */
 public class JdbcMonitorTagginFilter implements Filter {
 
-	private ServletContext servletContext = null;
-
 	@Override
 	public void init(FilterConfig config) throws ServletException {
-		this.servletContext = config.getServletContext();
 	}
 
 	@Override
