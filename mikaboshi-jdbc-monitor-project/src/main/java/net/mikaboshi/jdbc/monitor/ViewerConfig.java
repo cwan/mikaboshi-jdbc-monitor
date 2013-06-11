@@ -2,7 +2,6 @@ package net.mikaboshi.jdbc.monitor;
 
 import java.awt.Dimension;
 import java.io.File;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -649,19 +648,9 @@ public class ViewerConfig {
 	 */
 	public static class LogFile {
 
-		private String charSet = Charset.defaultCharset().name();
-
 		private String path = null;
 
 		private long readInterval = 100L;
-
-		public String getCharSet() {
-			return charSet;
-		}
-
-		public void setCharSet(String charSet) {
-			this.charSet = charSet;
-		}
 
 		public String getPath() {
 			return path;

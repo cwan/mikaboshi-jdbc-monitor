@@ -8,10 +8,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 
 import javax.swing.JOptionPane;
 
 import net.mikaboshi.jdbc.monitor.LogEntry;
+import net.mikaboshi.jdbc.monitor.LogWriter;
 import net.mikaboshi.jdbc.monitor.M17N;
 
 import org.apache.commons.io.IOUtils;
@@ -22,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
  * ログファイルの読み書き時のファイルダイアログに関する処理を行う。
  *
  * @author Takuma Umezawa
- *
+ * @version 1.4.3
  */
 public class LogFileDialogHelper {
 
@@ -34,12 +36,10 @@ public class LogFileDialogHelper {
 	 * ファイルダイアログを表示し、現在のテーブルの内容をファイルに保存する。
 	 * @param parent 親フレーム
 	 * @param logTableModel 書き出す内容が格納されたLogTableModel
-	 * @param encoding 書き出すファイルのエンコーディング
 	 */
 	public static void saveLogFile(
 			Frame parent,
-			LogTableModel logTableModel,
-			String encoding) {
+			LogTableModel logTableModel) {
 
 		FileDialog fileDialog = new FileDialog(
 				parent,
@@ -64,7 +64,14 @@ public class LogFileDialogHelper {
 		try {
 			out = new FileOutputStream(file);
 			writer = new PrintWriter(
-							new OutputStreamWriter(out, encoding));
+							new OutputStreamWriter(out));
+
+			// 文字コードを出力
+			writer.print(LogWriter.LOGTYPE_CHARSET);
+			writer.print(",");
+			writer.print(Charset.defaultCharset().name());
+			writer.print(",");
+			writer.println(LogEntry.END_OF_LINE);
 
 			for (LogEntry entry : logTableModel.getVisibleLogList()) {
 				writer.println(entry.toLogString());

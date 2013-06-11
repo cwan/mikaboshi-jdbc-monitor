@@ -429,8 +429,7 @@ public class JdbcLogViewerFrame extends JFrame implements LogEntryProvider {
 					// ファイルダイアログを表示し、現在のテーブルの内容を保存する。
 					LogFileDialogHelper.saveLogFile(
 							JdbcLogViewerFrame.this,
-							getLogTableModel(),
-							ViewerConfig.getInstance().getLogFile().getCharSet());
+							getLogTableModel());
 				}
 			});
 		}
@@ -2121,9 +2120,7 @@ public class JdbcLogViewerFrame extends JFrame implements LogEntryProvider {
 		onChangeSelectRows();
 		getSqlPreviewTextArea().setText("");
 
-		logAccessor = new LogFileAccessor(
-				logFile,
-				ViewerConfig.getInstance().getLogFile().getCharSet());
+		logAccessor = new LogFileAccessor(logFile, null);
 
 		// 先頭から読み込むかどうか確認
 		boolean loadOnOpen = showConfirmDialog(

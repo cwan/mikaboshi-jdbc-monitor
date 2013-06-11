@@ -53,8 +53,6 @@ public class LogWriter {
 
 	private static Log systemLogger = LogFactory.getLog(LogWriter.class);
 
-	private static boolean outputCharset = false;
-
 	private final SimpleFileLogger logger;
 
 	private static final CSVStrategy csvStrategy = new StandardCSVStrategy();
@@ -70,7 +68,13 @@ public class LogWriter {
 		boolean append = true;
 		boolean autoFlush = false;
 
-		this.logger = new SimpleFileLogger(path, append, autoFlush, 32768);
+		this.logger = new SimpleFileLogger(path, append, autoFlush, 32768) {
+			@Override
+			protected void afterOpen() {
+				putSimpleInfo(LOGTYPE_CHARSET, Charset.defaultCharset().name());
+			}
+		};
+
 		this.logger.setCloseOnShutdown(false);
 
 
@@ -147,10 +151,6 @@ public class LogWriter {
 	 */
 	public static void put(LogEntry entry) {
 
-		if (instance == null) {
-			return;
-		}
-
 		String tag = null;
 
 		tag = Tag.getInstance().get();
@@ -172,12 +172,6 @@ public class LogWriter {
 	 * @param driverClass
 	 */
 	public static void putDriver(String driverClass) {
-
-		if (!outputCharset) {
-			putSimpleInfo(LOGTYPE_CHARSET, Charset.defaultCharset().name());
-			outputCharset = true;
-		}
-
 		putConnectInfo(LOGTYPE_DRIVER_CLASS, driverClass);
 	}
 
@@ -235,10 +229,6 @@ public class LogWriter {
 	}
 
 	private static void putSimpleInfo(String logType, String value) {
-
-		if (instance == null) {
-			return;
-		}
 
 		String log = new StringBuilder()
 			.append(logType)

@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * JDBC Loggerのログファイルを読み込む。
  * @author Takuma Umezawa
- *
+ * @version 1.4.3
  */
 public class LogFileAccessor {
 
@@ -37,7 +37,6 @@ public class LogFileAccessor {
 
 	private File logFile;
 	private String logFileCharset;
-	private String indicatedLogFileCharset;
 
 	/**
 	 * 前回読み込んだときのファイルサイズ。（読み直しのチェックに使う）
@@ -64,7 +63,6 @@ public class LogFileAccessor {
 	private Reader logFileReader;
 	private InputStream logFileInputStream;
 	private int lineCount = 0;
-	private boolean charsetIsSet = false;
 	private RandomAccessFile randomAccessLogFile;
 
 	private long filePointer = 0L;
@@ -77,7 +75,6 @@ public class LogFileAccessor {
 
 		this.logFile = logFile;
 		this.logFileCharset = logFileCharset;
-		this.indicatedLogFileCharset = logFileCharset;
 
 		// シャットダウン時にファイルを閉じる
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -169,15 +166,15 @@ public class LogFileAccessor {
 
 		if (items.length == 3 && LogWriter.LOGTYPE_CHARSET.equals(items[0])) {
 
-			if (this.lineCount == 1 && !this.charsetIsSet && StringUtils.isBlank(this.indicatedLogFileCharset)) {
+			if (this.lineCount == 1
+					&& !isSameCharset(items[1], this.logFileCharset)) {
+
 				// 先頭に文字コードの指定がある場合は、読みなおす
 				this.logFileCharset = items[1];
 
 				close();
 				this.filePointer = 0L;
 				open();
-
-				this.charsetIsSet = true;
 			}
 
 			return readNextLog();
@@ -216,6 +213,19 @@ public class LogFileAccessor {
 			}
 
 			return null;
+		}
+	}
+
+	private boolean isSameCharset(String charset1, String charset2) {
+
+		if (charset1 == null || charset2 == null) {
+			return false;
+		}
+
+		try {
+			return Charset.forName(charset1).equals(Charset.forName(charset2));
+		} catch (Exception e) {
+			return false;
 		}
 	}
 
