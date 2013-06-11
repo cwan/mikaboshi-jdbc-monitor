@@ -573,17 +573,28 @@ public class LogEntry implements Serializable {
 		StringBuilder buf = new StringBuilder();
 
 		int callStackLevel = LogMode.getInstance().getCallStackLevel();
+		int lineCount = 0;
+		int abbreviatedLines = 0;
 
 		// 1つめは、Thread#getStackTraceなので除く
-		for (int i = 1; i < stackTraceElements.length &&
-			i <= callStackLevel; i++) {
+		for (int i = 1; i < stackTraceElements.length; i++) {
 
-			StackTraceElement e = stackTraceElements[i];
-			buf.append(e.toString());
+			if (lineCount > callStackLevel) {
+				abbreviatedLines++;
+				continue;
+			}
+
+			String line = stackTraceElements[i].toString();
+
+			if (buf.length() == 0 && line.startsWith("net.mikaboshi.jdbc.monitor.")) {
+				// ラッパークラスのログは除く
+				continue;
+			}
+
+			buf.append(line);
 			buf.append(IOUtils.LINE_SEPARATOR);
+			lineCount++;
 		}
-
-		int abbreviatedLines = stackTraceElements.length - callStackLevel;
 
 		if (abbreviatedLines > 0) {
 			buf.append(M17N.get("LogEntry.abbreviated_lines", abbreviatedLines));
