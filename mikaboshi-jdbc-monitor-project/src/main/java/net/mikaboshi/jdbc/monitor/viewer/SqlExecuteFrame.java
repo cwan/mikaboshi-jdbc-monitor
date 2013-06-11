@@ -5,8 +5,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -195,8 +197,11 @@ public class SqlExecuteFrame extends JFrame {
 		if (consoleTextArea == null) {
 			consoleTextArea = new JTextArea();
 			consoleTextArea.setEditable(false);
+			consoleTextArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
 			consoleTextArea.setSize(new Dimension(564, 70));
 			consoleTextArea.setPreferredSize(new Dimension(400, 300));
+			consoleTextArea.setMargin(new Insets(10, 10, 10, 10));
+			consoleTextArea.setTabSize(4);
 		}
 		return consoleTextArea;
 	}

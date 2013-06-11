@@ -159,8 +159,9 @@ public class LogDetailFrame extends JFrame implements LogEntryProvider {
 			getExecuteSqlButton().setEnabled(
 					StringUtils.isNotBlank(sqlTextArea.getText()));
 
-			sqlTextArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+			sqlTextArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
 			sqlTextArea.setTabSize(4);
+			sqlTextArea.setMargin(new Insets(10, 10, 10, 10));
 
 			sqlTextArea.addMouseListener(new java.awt.event.MouseAdapter() {
 				// 右クリックしたときに、SQLを整形するか1行表示するか、ポップアップメニューで選択する
@@ -436,7 +437,10 @@ public class LogDetailFrame extends JFrame implements LogEntryProvider {
 		if (exceptionTextArea == null) {
 			exceptionTextArea = new JTextArea();
 			exceptionTextArea.setText(this.logEntry.getException());
+			exceptionTextArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
 			exceptionTextArea.setForeground(Color.RED);
+			exceptionTextArea.setTabSize(4);
+			exceptionTextArea.setMargin(new Insets(10, 10, 10, 10));
 
 			GuiUtils.setCeil(exceptionTextArea);
 		}
@@ -469,7 +473,10 @@ public class LogDetailFrame extends JFrame implements LogEntryProvider {
 	private JTextArea getCallStackTextArea() {
 		if (callStackTextArea == null) {
 			callStackTextArea = new JTextArea();
+			callStackTextArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
 			callStackTextArea.setText(this.logEntry.getCallStack());
+			callStackTextArea.setMargin(new Insets(10, 10, 10, 10));
+			callStackTextArea.setTabSize(4);
 
 			GuiUtils.setCeil(callStackTextArea);
 		}

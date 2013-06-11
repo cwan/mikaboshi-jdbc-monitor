@@ -242,9 +242,10 @@ public class JdbcLogViewerFrame extends JFrame implements LogEntryProvider {
 	private JTextArea getSqlPreviewTextArea() {
 		if (sqlPreviewTextArea == null) {
 			sqlPreviewTextArea = new JTextArea();
-			sqlPreviewTextArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+			sqlPreviewTextArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
 			sqlPreviewTextArea.setTabSize(4);
 			sqlPreviewTextArea.setEditable(false);
+			sqlPreviewTextArea.setMargin(new Insets(10, 10, 10, 10));
 
 			sqlPreviewTextArea.addMouseListener(new java.awt.event.MouseAdapter() {
 				// 右クリックしたときに、SQLの整形方法をポップアップメニューで選択する
