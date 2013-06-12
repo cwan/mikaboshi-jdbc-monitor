@@ -68,12 +68,7 @@ public class LogWriter {
 		boolean append = true;
 		boolean autoFlush = false;
 
-		this.logger = new SimpleFileLogger(path, append, autoFlush, 32768) {
-			@Override
-			protected void afterOpen() {
-				putSimpleInfo(LOGTYPE_CHARSET, Charset.defaultCharset().name());
-			}
-		};
+		this.logger = new SimpleFileLogger(path, append, autoFlush, 32768);
 
 		this.logger.setCloseOnShutdown(false);
 
@@ -99,6 +94,9 @@ public class LogWriter {
 			// 既存のログファイルを削除する
 			this.logger.clean();
 		}
+
+		// 最初に文字コードを出力
+		putSimpleInfo(LOGTYPE_CHARSET, Charset.defaultCharset().name());
 
 		String rotateMb = System.getProperty(PROP_ROTATE_MB);
 
